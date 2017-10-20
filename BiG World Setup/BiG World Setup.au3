@@ -3,7 +3,7 @@ AutoItSetOption('GUIResizeMode', 1); resize and reposition GUI-elements accordin
 AutoItSetOption('GUICloseOnESC', 0);  don't send the $GUI_EVENT_CLOSE message when ESC is pressed
 AutoItSetOption('TrayIconDebug', 1); shows the current script line in the tray icon tip to help debugging
 AutoItSetOption('GUIOnEventMode', 0); disable OnEvent functions notifications
-AutoItSetOption('OnExitFunc', 'Au3Exit'); sets the name of the function called when AutoIt exits
+OnAutoItExitRegister('Au3Exit'); sets the name of the function called when AutoIt exits
 ;AutoItSetOption('MustDeclareVars', 1); require Local/Global/Dim pre-declaration of variables to help catch bugs
 
 TraySetIcon(@ScriptDir & '\Pics\BWS.ico'); sets the tray-icon
@@ -63,28 +63,38 @@ Global $g_TRAIni = $g_ProgDir & '\Config\Translation-' & $g_ATrans[$g_ATNum] & '
 ; $g_UI 0=main, 1=child-window with BWP-pic, 2=width, 3=height, 4=child-window with progress-bar
 
 #EndRegion Global vars
+
 #Region Includes
-#include'Includes\01_UDF1.au3'
-#include'Includes\02_UDF2.au3'
-#include'Includes\03_Admin.au3'
-#include'Includes\04_Backup.au3'
-#include'Includes\05_Basics.au3'
-#include'Includes\06_Depend.au3'
-#include'Includes\07_Extract.au3'
-#include'Includes\08_GUI.au3'
-#include'Includes\09_Install.au3'
-#include'Includes\10_Misc-GUI.au3'
-#include'Includes\11_NET.au3'
-#include'Includes\12_Process.au3'
-#include'Includes\13_Select-AI.au3'
-#include'Includes\14_Select-GUILoop.au3'
-#include'Includes\15_Select-Helper.au3'
-#include'Includes\16_Select-Tree.au3'
-#include'Includes\17_Testing.au3'
+; These are normally packaged with AutoIt and included like: #include <GUIConstants.au3>
+#include 'Includes\UDFs\GUIConstants.au3'
+#include 'Includes\UDFs\InetConstants.au3'
+#include 'Includes\UDFs\GuiEdit.au3'
+#include 'Includes\UDFs\GuiListView.au3'
+#include 'Includes\UDFs\GuiTreeView.au3'
+#include 'Includes\UDFs\Misc.au3'
+#include 'Includes\UDFs\Math.au3'
+#include 'Includes\UDFs\WinAPI.au3'
+; The following includes are scripts named for their grouped functions.
+#include 'Includes\02_UDF2.au3'
+#include 'Includes\03_Admin.au3'
+#include 'Includes\04_Backup.au3'
+#include 'Includes\05_Basics.au3'
+#include 'Includes\06_Depend.au3'
+#include 'Includes\07_Extract.au3'
+#include 'Includes\08_GUI.au3'
+#include 'Includes\09_Install.au3'
+#include 'Includes\10_Misc-GUI.au3'
+#include 'Includes\11_NET.au3'
+#include 'Includes\12_Process.au3'
+#include 'Includes\13_Select-AI.au3'
+#include 'Includes\14_Select-GUILoop.au3'
+#include 'Includes\15_Select-Helper.au3'
+#include 'Includes\16_Select-Tree.au3'
+#include 'Includes\17_Testing.au3'
 #EndRegion Includes
+
 ;#NoTrayIcon
 
-#Region Copy between games
 
 $g_Order = IniReadSection($g_BWSIni, 'Order'); reload this to get the new selected functions
 
@@ -117,7 +127,7 @@ Func Au3GetVal($p_Num = 0)
 	Local $ReadSection = IniReadSection($g_UsrIni, 'Options')
 	Local $Test = StringSplit(_IniRead($ReadSection, 'AppType', 'BWP:BWS'), ':'); need correct gametype
 	If $Test[0] <> 2 Then; revert to default if AppType in User.ini is not in expected format
-		$Test = [2, "BWP", "BWS"]
+		_ArrayAdd($Test, "BWP|BWS")
 	EndIf
 	_Misc_Set_GConfDir($Test[1]); first part before : is the conf folder
 	$g_Flags[14] = StringUpper($Test[2]); second part after : determines the target game folder where mods will be installed

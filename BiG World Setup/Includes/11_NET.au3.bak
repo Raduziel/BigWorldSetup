@@ -809,7 +809,7 @@ Func _Net_LinkGetInfo($p_URL, $p_Debug = 0)
 			$Return[0] = 0
 			Return $Return
 		EndIf
-	EndIf
+    EndIf
 	If Not StringRegExp($Return[1], '(?i)(pdf|exe|rar|zip|7z|ace)\z') Then
 		$Return[0] = 0
 		Return $Return ; this was some garbage

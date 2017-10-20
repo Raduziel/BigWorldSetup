@@ -960,7 +960,7 @@ EndFunc   ;==>_Depend_GetActiveDependAdv
 ; See if a component is installed that has a conflict with a combination of other listed components
 ; ---------------------------------------------------------------------------------------------
 Func _Depend_GetActiveConflictAdv($p_String, $p_RuleID, $p_Show)
-	Local $p_Debug = 0
+	Local $p_Debug = 0, $Return, $r = 0
 	If $p_Debug Then FileWrite($g_LogFile, '_Depend_GACA_' & $p_RuleID & ': $p_String = ' & $p_String & ' for ' & $g_Connections[$p_RuleID][0] & '=C:' & $g_Connections[$p_RuleID][1] & @CRLF)
 	If StringInStr($p_String, '>') Then
 		_PrintDebug("! Error ! Invalid conflict rule (contains both '>' and ':') in Connections section of " & $g_ConnectionsConfDir & '\Game.ini: ' & $Return[$r][0] & '=' & $Return[$r][1], 1)

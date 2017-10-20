@@ -260,7 +260,7 @@ Func Au3RunFix($p_Num = 0)
 			GUICtrlSetData($g_UI_Interact[6][1], $i)
 		Next
 		GUICtrlSetState($g_UI_Button[0][3], $Gui_ENABLE)
-		AutoItSetOption('OnExitFunc', '_Install_BatchRun') ; execute batch on close
+		OnAutoItExitRegister('_Install_BatchRun') ; execute batch on close
 		_ResetInstall()
 		_Process_Gui_Delete(7, 7, 1)
 		Exit
