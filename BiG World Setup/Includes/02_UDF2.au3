@@ -4,7 +4,7 @@
 ; ---------------------------------------------------------------------------------------------
 
 ; __Http-stuff
-Global $g_HTTPUserAgent = 'AutoIt3/'&@AutoItVersion, $g_Limit_TimeOut = 5000
+Global $g_HTTPUserAgent = 'AutoIt3/' & @AutoItVersion, $g_Limit_TimeOut = 5000
 Global $g_HTTP_TCP_Def_Port = 80, $g_HTTP_TCP_Port = $g_HTTP_TCP_Def_Port, $g_LAST_SOCKET = -1
 
 
@@ -37,7 +37,7 @@ Func __HTTPGet($Host, $Page, $Socket, $sRequest = "GET", $sReferrer = "")
 	If $BytesSent = 0 Then Return SetError(1, @error, 0)
 	Return $BytesSent
 EndFunc   ;==>__HTTPGet
-#EndRegion HTTP
+#EndRegion HTTP: Done by MrCreatoR
 
 ; ---------------------------------------------------------------------------------------------
 ; Tries to reduce it's own memory usage if called without parameters. Done by w0uter
@@ -57,13 +57,13 @@ EndFunc   ;==>__ReduceMemory
 ; ---------------------------------------------------------------------------------------------
 ; Show a menu at the given Ctrl in a given window. Lend from helpfile-example
 ; ---------------------------------------------------------------------------------------------
-Func __ShowContextMenu($p_Title, $p_Handle, $p_Menu); $a=GUI, $b=GuiCtrl, $c=ContextMenu
+Func __ShowContextMenu($p_Title, $p_Handle, $p_Menu) ; $a=GUI, $b=GuiCtrl, $c=ContextMenu
 	Local $arPos, $x, $y
 	Local $hMenu = GUICtrlGetHandle($p_Menu)
 	Local $stPoint = DllStructCreate("int;int")
 	$arPos = ControlGetPos($p_Title, "", $p_Handle)
 	If @error = 1 Then
-		$arPos=GUIGetCursorInfo($g_UI[0])
+		$arPos = GUIGetCursorInfo($g_UI[0])
 		DllStructSetData($stPoint, 1, $arPos[0])
 		DllStructSetData($stPoint, 2, $arPos[1])
 	Else
@@ -84,49 +84,49 @@ Func __StringSplit_ByLength($p_String, $p_Length, $p_Handle)
 	Local $Num = 1
 	If IsHWnd($p_Handle) = 0 Then $p_Handle = ControlGetHandle($g_UI[0], "", $p_Handle)
 	If $p_Length = -1 Then
-		$p_Length = ControlGetPos($g_UI[0], '', $p_Handle)-10
-		$p_Length = $p_Length[2]-10
-		If $p_Handle = ControlGetHandle($g_UI[0], "",$g_UI_Interact[6][2]) Then $p_Length -= 20; scrollbar is always visible
+		$p_Length = ControlGetPos($g_UI[0], '', $p_Handle) - 10
+		$p_Length = $p_Length[2] - 10
+		If $p_Handle = ControlGetHandle($g_UI[0], "", $g_UI_Interact[6][2]) Then $p_Length -= 20 ; scrollbar is always visible
 	EndIf
-	Local $hDC = DLLCall("user32.dll","int","GetDC","hwnd",$p_Handle)
+	Local $hDC = DllCall("user32.dll", "int", "GetDC", "hwnd", $p_Handle)
 	$hDC = $hDC[0]
 	Local $hFont = DllCall("user32.dll", "ptr", "SendMessage", "hwnd", $p_Handle, "int", $WM_GETFONT, "int", 0, "int", 0)
 	$hFont = $hFont[0]
 	Local $hOld = DllCall("gdi32.dll", "Hwnd", "SelectObject", "int", $hDC, "ptr", $hFont)
 	Local $struct_size = DllStructCreate("int;int")
-	$p_String=StringReplace($p_String, '|', ' '&@CRLF&' ')
-	$p_String=StringSplit($p_String, ' ')
-	Local $Out='', $Len='', $Tmp2
-	For $t=1 to $p_String[0]
-		If $p_String[$t] = @CRLF Then; handle manual line-breaks
-			$Out=$Out & @CRLF
-			$Len=''
-			$Num+=1
-			$t+=1
-			$Tmp2=$p_String[$t]
+	$p_String = StringReplace($p_String, '|', ' ' & @CRLF & ' ')
+	$p_String = StringSplit($p_String, ' ')
+	Local $Out = '', $Len = '', $Tmp2
+	For $t = 1 To $p_String[0]
+		If $p_String[$t] = @CRLF Then ; handle manual line-breaks
+			$Out = $Out & @CRLF
+			$Len = ''
+			$Num += 1
+			$t += 1
+			$Tmp2 = $p_String[$t]
 		Else
-			$Tmp2=$Len & ' ' &$p_String[$t]
+			$Tmp2 = $Len & ' ' & $p_String[$t]
 		EndIf
 		Local $ret = DllCall("gdi32.dll", "int", "GetTextExtentPoint32", "int", $hDC, "str", $Tmp2, "long", StringLen($Tmp2), "ptr", DllStructGetPtr($struct_size))
-		$Tmp2 = DllStructGetData($struct_size,1)
+		$Tmp2 = DllStructGetData($struct_size, 1)
 		If $Tmp2 > $p_Length Then
-			$Out=$Out & @CRLF &$p_String[$t]
-			$Len=$p_String[$t]
-			$Num+=1
+			$Out = $Out & @CRLF & $p_String[$t]
+			$Len = $p_String[$t]
+			$Num += 1
 		Else
 			If $Len = '' Then ; no need to add spaces for seperation if nothing is written in this line.
-				$Out=$Out & $p_String[$t]
-				$Len=$p_String[$t]
+				$Out = $Out & $p_String[$t]
+				$Len = $p_String[$t]
 			Else
-				$Out=$Out & ' ' & $p_String[$t]
-				$Len=$Len & ' ' & $p_String[$t]
+				$Out = $Out & ' ' & $p_String[$t]
+				$Len = $Len & ' ' & $p_String[$t]
 			EndIf
 		EndIf
 	Next
 	$hOld = DllCall("gdi32.dll", "Hwnd", "SelectObject", "int", $hDC, "ptr", $hOld)
-	DLLCall("user32.dll","int","ReleaseDC","hwnd",$p_Handle,"int",$hDC)
+	DllCall("user32.dll", "int", "ReleaseDC", "hwnd", $p_Handle, "int", $hDC)
 	$struct_size = 0
-	Local $Tmp2 [2] = [$Out, $Num]
+	Local $Tmp2[2] = [$Out, $Num]
 	Return $Tmp2
 EndFunc   ;==>__StringSplit_ByLength
 
@@ -157,7 +157,7 @@ Func __TristateTreeView_InvalidateRect($p_Handle, $p_String, $p_Num)
 	DllCall("user32.dll", "int", "InvalidateRect", "hwnd", $p_Handle, "ptr", $p_String, "int", $p_Num)
 EndFunc   ;==>__TristateTreeView_InvalidateRect
 
-Func __TristateTreeView_LoadStateImage($p_Handle, $p_File); $a=handle; $b=file
+Func __TristateTreeView_LoadStateImage($p_Handle, $p_File) ; $a=handle; $b=file
 	Local $Tmp1 = __TristateTreeView_ImageList_LoadImage(0, $p_File, 16, 1, 0xFFFFFFFF, 0, BitOR(0x0010, 0x0020, 0x2000))
 	__TristateTreeView_SendMessage($p_Handle, 0x1100 + 9, 2, $Tmp1)
 	__TristateTreeView_InvalidateRect($p_Handle, 0, 1)
@@ -176,7 +176,7 @@ EndFunc   ;==>__TristateTreeView_SendMessage
 ; Sets the tristate icon - code by Helge
 ; $GUI_UNCHECKED=1; $GUI_CHECKED=2; $GUI_INDETERMINATE=3; $GUI_DISABLE+$GUI_UNCHECKED=4; $GUI_DISABLE+$GUI_CHECKED=5
 ; ---------------------------------------------------------------------------------------------
-Func __TristateTreeView_SetItemState($p_Handle, $p_Num, $p_Show); $a=handle tree; $b=handle item; $c=state
+Func __TristateTreeView_SetItemState($p_Handle, $p_Num, $p_Show) ; $a=handle tree; $b=handle item; $c=state
 	$p_Show = BitShift($p_Show, -12)
 	Local $Tmp1 = DllStructCreate("uint;dword;uint;uint;ptr;int;int;int;int;int;int")
 	DllStructSetData($Tmp1, 1, 0x0008)

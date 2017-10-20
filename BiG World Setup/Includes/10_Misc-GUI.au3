@@ -9,13 +9,13 @@ Func _Misc_Search($p_ID, $p_String, $p_Occurrence = 1)
 EndFunc   ;==>_Misc_Search
 
 Func _Misc_Set_GConfDir($p_GameType)
-	$g_GConfDir = $g_ProgDir & '\Config\'&$p_GameType
+	$g_GConfDir = $g_ProgDir & '\Config\' & $p_GameType
 	If StringRegExp($p_GameType, 'BG[1-2]EE') Then
-		$g_ConnectionsConfDir = $g_ProgDir&'\Config\BWP'; make BG1EE and BG2EE use BWP Game.ini for Connections rules
+		$g_ConnectionsConfDir = $g_ProgDir & '\Config\BWP' ; make BG1EE and BG2EE use BWP Game.ini for Connections rules
 	Else
 		$g_ConnectionsConfDir = $g_GConfDir
 	EndIf
-EndFunc   ;==>_Misc_SetGConfDir
+EndFunc   ;==>_Misc_Set_GConfDir
 
 ; ---------------------------------------------------------------------------------------------
 ; Displays the about-screen
@@ -23,9 +23,9 @@ EndFunc   ;==>_Misc_SetGConfDir
 Func _Misc_AboutGUI()
 	Local $String = 'BiG World Setup', $Version
 	Local $Current = GUICtrlRead($g_UI_Seperate[0][0]) + 1
-	; ---------------------------------------------------------------------------------------------
-	; Fetch the version number
-	; ---------------------------------------------------------------------------------------------
+; ---------------------------------------------------------------------------------------------
+; Fetch the version number
+; ---------------------------------------------------------------------------------------------
 	Local $Array = StringSplit(StringStripCR(FileRead($g_ProgDir & '\Docs\Changelog.txt')), @LF)
 	For $a = $Array[0] To 1 Step -1
 		If StringRegExp($Array[$a], '\A\d{8,}') Then
@@ -35,9 +35,9 @@ Func _Misc_AboutGUI()
 		EndIf
 	Next
 	If $Version <> '' Then $String &= ' (' & $Version & ')'
-	; ---------------------------------------------------------------------------------------------
-	; And action
-	; ---------------------------------------------------------------------------------------------
+; ---------------------------------------------------------------------------------------------
+; And action
+; ---------------------------------------------------------------------------------------------
 	GUICtrlSetData($g_UI_Static[7][1], $String)
 	_Misc_SetTab(7)
 	Local $OldMode = AutoItSetOption('GUIOnEventMode')
@@ -133,8 +133,8 @@ Func _Misc_LS_GUI()
 	Local $LV
 	Local $LV1 = GUICtrlGetHandle($g_UI_Interact[15][1])
 	Local $LV2 = GUICtrlGetHandle($g_UI_Interact[15][2])
-	Local $SArray = StringSplit(_GetTR($g_UI_Message, '15-L1'), '|'); => short available translations for the mods
-	Local $LArray = StringSplit(_GetTR($g_UI_Message, '15-I1'), '|'); => long available translations for the mods
+	Local $SArray = StringSplit(_GetTR($g_UI_Message, '15-L1'), '|') ; => short available translations for the mods
+	Local $LArray = StringSplit(_GetTR($g_UI_Message, '15-I1'), '|') ; => long available translations for the mods
 	For $l = 1 To $LArray[0]
 		If Not FileExists($g_GConfDir & '\WeiDU-' & $SArray[$l] & '.ini') Then ContinueLoop
 		GUICtrlCreateListViewItem($LArray[$l], $g_UI_Interact[15][1])
@@ -154,7 +154,7 @@ Func _Misc_LS_GUI()
 	Local $msg, $t, $OldLV, $Test, $Name, $Tra
 	While 1
 		$msg = GUIGetMsg()
-		$t += 1; rather ugly check to get the listview that has focus to avoid problems after _Misc_ReBuildTreeView was called
+		$t += 1 ; rather ugly check to get the listview that has focus to avoid problems after _Misc_ReBuildTreeView was called
 		If $t = 40 Then
 			$OldLV = $LV
 			$Test = ControlGetHandle($g_UI[0], '', ControlGetFocus($g_UI[0]))
@@ -164,20 +164,20 @@ Func _Misc_LS_GUI()
 		EndIf
 		Switch $msg
 			Case $GUI_EVENT_CLOSE
-				$Test = _Misc_LS_Verify(); do not exit without at least one selection
+				$Test = _Misc_LS_Verify() ; do not exit without at least one selection
 				If $Test = 1 Then ExitLoop
-			Case $g_UI_Button[0][3]; go back to the folder-selection-screen
-				$Test = _Misc_LS_Verify(); do not exit without at least one selection
+			Case $g_UI_Button[0][3] ; go back to the folder-selection-screen
+				$Test = _Misc_LS_Verify() ; do not exit without at least one selection
 				If $Test = 1 Then ExitLoop
-			Case $g_UI_Button[15][1]; delete
+			Case $g_UI_Button[15][1] ; delete
 				_Misc_LS_EditItem(2, $LV)
-			Case $g_UI_Button[15][2]; add
+			Case $g_UI_Button[15][2] ; add
 				_Misc_LS_EditItem(1)
-			Case $g_UI_Button[15][3]; decrease item
+			Case $g_UI_Button[15][3] ; decrease item
 				_Misc_LS_MoveItem('-1')
-			Case $g_UI_Button[15][4]; increase item
+			Case $g_UI_Button[15][4] ; increase item
 				_Misc_LS_MoveItem('+1')
-			Case $g_UI_Button[15][5]; show mods that fit the currently selected language
+			Case $g_UI_Button[15][5] ; show mods that fit the currently selected language
 				Local $Return = '', $Counter = 0
 				$Name = StringTrimRight(GUICtrlRead(GUICtrlRead($g_UI_Interact[15][$LV])), 1)
 				For $l = 1 To $LArray[0]
@@ -231,15 +231,15 @@ EndFunc   ;==>_Misc_LS_MoveItem
 Func _Misc_LS_Verify()
 	_PrintDebug('+' & @ScriptLineNumber & ' Calling _Misc_LS_Verify')
 	Local $BGTInstallable = 0, $Error = '', $Reset = 0, $Tra, $Valid = 0
-	Local $Current = GUICtrlRead($g_UI_Seperate[0][0]) + 1; avoid loops for updates during info-screen later
-	Local $LArray = StringSplit(_GetTR($g_UI_Message, '15-I1'), '|'); => long available translations for the mods
+	Local $Current = GUICtrlRead($g_UI_Seperate[0][0]) + 1 ; avoid loops for updates during info-screen later
+	Local $LArray = StringSplit(_GetTR($g_UI_Message, '15-I1'), '|') ; => long available translations for the mods
 	Local $MArray = StringSplit(GUICtrlRead($g_UI_Interact[2][5]), ' ')
-	Local $SArray = StringSplit(_GetTR($g_UI_Message, '15-L1'), '|'); => short available translations for the mods
+	Local $SArray = StringSplit(_GetTR($g_UI_Message, '15-L1'), '|') ; => short available translations for the mods
 	If StringRegExp($g_Flags[14], 'BWS|BWP') Then $Tra = IniRead($g_ModIni, 'BGT', 'Tra', '')
-	If $g_Flags[14] = 'BG2EE' Then $Tra = IniRead($g_ModIni, 'EET', 'Tra', ''); BG2EE uses EET for merging games
-	If $Current = 15 Then; lang-tab
+	If $g_Flags[14] = 'BG2EE' Then $Tra = IniRead($g_ModIni, 'EET', 'Tra', '') ; BG2EE uses EET for merging games
+	If $Current = 15 Then ; lang-tab
 		Local $Selected = ControlListView($g_Ui[0], '', $g_UI_Interact[15][2], 'GetItemCount')
-		If $Selected = 0 Then $Error = '|' & _GetTR($g_UI_Message, '2-L1'); => select a translation
+		If $Selected = 0 Then $Error = '|' & _GetTR($g_UI_Message, '2-L1') ; => select a translation
 		Local $ID, $Text, $Return = ''
 		For $s = 0 To $Selected - 1
 			$ID = _GUICtrlListView_GetItemParam($g_UI_Interact[15][2], $s)
@@ -252,19 +252,19 @@ Func _Misc_LS_Verify()
 				EndIf
 			Next
 		Next
-		If $g_Flags[3] <> StringTrimLeft($Return, 1) Then $Reset = 1; token is not found in current setting
+		If $g_Flags[3] <> StringTrimLeft($Return, 1) Then $Reset = 1 ; token is not found in current setting
 		$g_Flags[3] = StringTrimLeft($Return, 1)
 		Local $Last = _GUICtrlListView_GetItemParam($g_UI_Interact[15][2], $Selected - 1)
 		Local $First = _GUICtrlListView_GetItemParam($g_UI_Interact[15][1], 0)
 		If $BGTInstallable = 1 Then
 			For $ID = $Last To $First Step -1
-				GUICtrlDelete($ID); delete all GuiListViewItems so _Tree_Reload works as expected
+				GUICtrlDelete($ID) ; delete all GuiListViewItems so _Tree_Reload works as expected
 			Next
 		EndIf
-	Else; folder-tab
+	Else ; folder-tab
 		Local $Selected = GUICtrlRead($g_UI_Interact[2][5])
-		If $g_Flags[3] <> $Selected Then $Reset = 1; changes have been made
-		If $Selected = '' Then $Error = _GetTR($g_UI_Message, '2-L1'); => select a translation
+		If $g_Flags[3] <> $Selected Then $Reset = 1 ; changes have been made
+		If $Selected = '' Then $Error = _GetTR($g_UI_Message, '2-L1') ; => select a translation
 		For $m = 1 To $MArray[0]
 			For $s = 1 To $SArray[0]
 				If $MArray[$m] = $SArray[$s] Then
@@ -275,20 +275,20 @@ Func _Misc_LS_Verify()
 				EndIf
 			Next
 		Next
-		If $Valid <> $MArray[0] Then $Error = '|' & _GetTR($g_UI_Message, '2-L1'); => select a translation
+		If $Valid <> $MArray[0] Then $Error = '|' & _GetTR($g_UI_Message, '2-L1') ; => select a translation
 		$g_Flags[3] = $Selected
 	EndIf
-	If $BGTInstallable = 0 And GUICtrlRead($g_UI_Interact[2][1]) <> '-' Then $Error &= '||' & IniRead($g_GConfDir & '\Translation-' & $g_ATrans[$g_ATNum] & '.ini', 'UI-RunTime', '2-L4', ''); => BGT/EET not installable
+	If $BGTInstallable = 0 And GUICtrlRead($g_UI_Interact[2][1]) <> '-' Then $Error &= '||' & IniRead($g_GConfDir & '\Translation-' & $g_ATrans[$g_ATNum] & '.ini', 'UI-RunTime', '2-L4', '') ; => BGT/EET not installable
 	If $Error <> '' Then
-		If $Current = 2 Then $Error &= '||' & _GetTR($g_UI_Message, '2-L5'); => start assistant
-		_Misc_MsgGUI(4, _GetTR($g_UI_Message, '0-T1'), $Error); => warning
+		If $Current = 2 Then $Error &= '||' & _GetTR($g_UI_Message, '2-L5') ; => start assistant
+		_Misc_MsgGUI(4, _GetTR($g_UI_Message, '0-T1'), $Error) ; => warning
 		If $Current = 2 Then _Misc_LS_GUI()
 		Return 0
 	EndIf
-	IniWrite($g_UsrIni, 'Options', 'ModLang', $g_Flags[3]); Fetch the selected items and write them into the users preference(s)-file
+	IniWrite($g_UsrIni, 'Options', 'ModLang', $g_Flags[3]) ; Fetch the selected items and write them into the users preference(s)-file
 	GUICtrlSetData($g_UI_Interact[2][5], $g_Flags[3])
-	$g_MLang = StringSplit($g_Flags[3] & ' --', ' '); reset the array with the selected languages. -- is added for mods with no text = suitable for all languages
-	If $Reset = 1 And $g_Skip <> '' Then _Misc_ReBuildTreeView(); another language-token was added that was not used before and Treeview exists
+	$g_MLang = StringSplit($g_Flags[3] & ' --', ' ') ; reset the array with the selected languages. -- is added for mods with no text = suitable for all languages
+	If $Reset = 1 And $g_Skip <> '' Then _Misc_ReBuildTreeView() ; another language-token was added that was not used before and Treeview exists
 	Return 1
 EndFunc   ;==>_Misc_LS_Verify
 
@@ -296,16 +296,16 @@ EndFunc   ;==>_Misc_LS_Verify
 ; Creates the custom message-box
 ; ---------------------------------------------------------------------------------------------
 Func _Misc_MsgGUI($p_Icon, $p_Title, $p_Text, $p_Button = 1, $p_Text1 = '', $p_Text2 = '', $p_Text3 = '', $p_Time = -1)
-	_PrintDebug('+' & @ScriptLineNumber & ' Calling _Misc_MsgGUI'); >>> 1=continue, 2=cancel, 3=exit
+	_PrintDebug('+' & @ScriptLineNumber & ' Calling _Misc_MsgGUI') ; >>> 1=continue, 2=cancel, 3=exit
 	Local $Feed, $State[4]
-	If $p_Text1 = '' Then $p_Text1 = _GetTR($g_UI_Message, '8-B1'); => continue
-	If $p_Text2 = '' Then $p_Text2 = _GetTR($g_UI_Message, '8-B2'); => cancel
-	If $p_Text3 = '' Then $p_Text3 = _GetTR($g_UI_Message, '8-B3'); => exit
+	If $p_Text1 = '' Then $p_Text1 = _GetTR($g_UI_Message, '8-B1') ; => continue
+	If $p_Text2 = '' Then $p_Text2 = _GetTR($g_UI_Message, '8-B2') ; => cancel
+	If $p_Text3 = '' Then $p_Text3 = _GetTR($g_UI_Message, '8-B3') ; => exit
 	Local $String = __StringSplit_ByLength($p_Text, 310, $g_UI_Interact[8][1])
 	$p_Text = StringReplace(_StringStripCRLF($p_Text), '|', @CRLF)
-	; ---------------------------------------------------------------------------------------------
-	; Display different icons
-	; ---------------------------------------------------------------------------------------------
+; ---------------------------------------------------------------------------------------------
+; Display different icons
+; ---------------------------------------------------------------------------------------------
 	If $p_Icon = 1 Then
 		GUICtrlSetImage($g_UI_Static[8][1], @ScriptDir & "\Pics\Info.ico")
 	ElseIf $p_Icon = 2 Then
@@ -315,9 +315,9 @@ Func _Misc_MsgGUI($p_Icon, $p_Title, $p_Text, $p_Button = 1, $p_Text1 = '', $p_T
 	ElseIf $p_Icon = 4 Then
 		GUICtrlSetImage($g_UI_Static[8][1], @ScriptDir & "\Pics\Error.ico")
 	EndIf
-	; ---------------------------------------------------------------------------------------------
-	; Position the icon and buttons
-	; ---------------------------------------------------------------------------------------------
+; ---------------------------------------------------------------------------------------------
+; Position the icon and buttons
+; ---------------------------------------------------------------------------------------------
 	Local $Pos = ControlGetPos($g_UI[0], '', $g_UI_Seperate[8][1])
 	GUICtrlSetPos($g_UI_Static[8][1], $Pos[0] + 15, $Pos[1] + Round(($Pos[3] - 90) / 2, 2), 48, 48)
 	If $p_Button = 1 Then
@@ -351,21 +351,21 @@ Func _Misc_MsgGUI($p_Icon, $p_Title, $p_Text, $p_Button = 1, $p_Text1 = '', $p_T
 		GUICtrlSetState($g_UI_Button[8][2], $GUI_SHOW)
 		GUICtrlSetState($g_UI_Button[8][3], $GUI_SHOW)
 	EndIf
-	; ---------------------------------------------------------------------------------------------
-	; Display the message
-	; ---------------------------------------------------------------------------------------------
-	GUICtrlSetData($g_UI_Seperate[8][1], $p_Title); hint
+; ---------------------------------------------------------------------------------------------
+; Display the message
+; ---------------------------------------------------------------------------------------------
+	GUICtrlSetData($g_UI_Seperate[8][1], $p_Title) ; hint
 	If $String[1] >= 10 Then
 		GUICtrlSetState($g_UI_Static[8][2], $GUI_HIDE)
 		GUICtrlSetState($g_UI_Interact[8][1], $GUI_SHOW)
-		GUICtrlSetData($g_UI_Interact[8][1], $p_Text); message
+		GUICtrlSetData($g_UI_Interact[8][1], $p_Text) ; message
 	Else
 		For $n = 1 To Ceiling((11 - $String[1]) / 2)
 			$Feed &= @CRLF
 		Next
 		GUICtrlSetState($g_UI_Interact[8][1], $GUI_HIDE)
 		GUICtrlSetState($g_UI_Static[8][2], $GUI_SHOW)
-		GUICtrlSetData($g_UI_Static[8][2], $Feed & $p_Text); message
+		GUICtrlSetData($g_UI_Static[8][2], $Feed & $p_Text) ; message
 	EndIf
 	Local $OldTab = GUICtrlRead($g_UI_Seperate[0][0])
 	For $i = 1 To 3
@@ -373,9 +373,9 @@ Func _Misc_MsgGUI($p_Icon, $p_Title, $p_Text, $p_Button = 1, $p_Text1 = '', $p_T
 	Next
 	If $g_Flags[9] = 1 Then WinSetState($g_UI[0], '', @SW_ENABLE)
 	_Misc_SetTab(8)
-	; ---------------------------------------------------------------------------------------------
-	; Be sure to be able to fetch button-clicks
-	; ---------------------------------------------------------------------------------------------
+; ---------------------------------------------------------------------------------------------
+; Be sure to be able to fetch button-clicks
+; ---------------------------------------------------------------------------------------------
 	Local $OldMode = AutoItSetOption('GUIOnEventMode')
 	If $OldMode Then AutoItSetOption('GUIOnEventMode', 0)
 	Local $msg, $Answer = 0, $Num = 0
@@ -388,14 +388,14 @@ Func _Misc_MsgGUI($p_Icon, $p_Title, $p_Text, $p_Button = 1, $p_Text1 = '', $p_T
 		Sleep(10)
 		$Num += 1
 	WEnd
-	; ---------------------------------------------------------------------------------------------
-	; Switch back to old state
-	; ---------------------------------------------------------------------------------------------
+; ---------------------------------------------------------------------------------------------
+; Switch back to old state
+; ---------------------------------------------------------------------------------------------
 	If $OldMode Then AutoItSetOption('GUIOnEventMode', $OldMode)
 	For $i = 1 To 3
 		If BitAND($State[$i], $GUI_ENABLE) Then GUICtrlSetState($g_UI_Button[0][$i], $GUI_ENABLE)
 	Next
-	If $OldTab <> 8 Then _Misc_SetTab($OldTab + 1); remove the icons from the screen
+	If $OldTab <> 8 Then _Misc_SetTab($OldTab + 1) ; remove the icons from the screen
 	If $g_Flags[9] = 1 Then WinSetState($g_UI[0], '', @SW_DISABLE)
 	Return $Answer
 EndFunc   ;==>_Misc_MsgGUI
@@ -417,20 +417,20 @@ EndFunc   ;==>_Misc_ProgressGUI
 Func _Misc_ReBuildTreeView($p_Save = 0)
 	_PrintDebug('+' & @ScriptLineNumber & ' Calling _Misc_ReBuildTreeView')
 	If $p_Save Then _Tree_GetCurrentSelection(0, @TempDir & '\BWS_Reload.ini')
-	For $t = 2 To 4; remove all defined menu-items
+	For $t = 2 To 4 ; remove all defined menu-items
 		For $c = 3 To $g_UI_Menu[0][3]
 			If $g_UI_Menu[$t][$c] <> '' Then GUICtrlDelete($g_UI_Menu[$t][$c])
 		Next
 	Next
-	For $c = $g_CentralArray[0][1] To $g_CentralArray[0][0]; remove treeview-items
+	For $c = $g_CentralArray[0][1] To $g_CentralArray[0][0] ; remove treeview-items
 		GUICtrlDelete($c)
 	Next
-	Global $g_TreeviewItem[1][1], $g_CHTreeviewItem[1][1], $g_Connections[1000][3], $g_CentralArray[1][16], $g_Test = ''; This cleans all the old settings (has to be removed, since its content depends on the language)
+	Global $g_TreeviewItem[1][1], $g_CHTreeviewItem[1][1], $g_Connections[1000][3], $g_CentralArray[1][16], $g_Test = '' ; This cleans all the old settings (has to be removed, since its content depends on the language)
 	Local $Pos = ControlGetPos($g_UI[0], '', $g_UI_Interact[4][1])
-	_GUICtrlListView_DeleteAllItems($g_UI_Handle[1]); delete dependencies
+	_GUICtrlListView_DeleteAllItems($g_UI_Handle[1]) ; delete dependencies
 	_Selection_GetCurrentInstallType()
 	_Misc_SetAvailableSelection()
-	_Tree_Populate(1 + $p_Save); rebuild Arrays, GUI and so on (_Tree_Populate will call _Tree_SetPreSelected UNLESS $p_Save = 1)
+	_Tree_Populate(1 + $p_Save) ; rebuild Arrays, GUI and so on (_Tree_Populate will call _Tree_SetPreSelected UNLESS $p_Save = 1)
 	;_Depend_AutoSolve('DS', 2, 1); disable mods/components with unsatisfied dependencies, skip warning rules
 	;_Depend_AutoSolve('C', 2, 1); disable conflict losers, skip warning rules
 	;_Depend_AutoSolve('DS', 2, 1); disable mods/components with unsatisfied dependencies, skip warning rules
@@ -446,13 +446,13 @@ EndFunc   ;==>_Misc_ReBuildTreeView
 Func _Misc_SelectFolder($p_Type, $p_Text)
 	Local $Folder = Eval('g_' & $p_Type & 'Dir')
 	If Not FileExists($Folder) Then $Folder = $g_BaseDir
-	$Folder = FileSelectFolder($p_Text, '', 2, $Folder & '\', $g_UI[0]); => select folder
+	$Folder = FileSelectFolder($p_Text, '', 2, $Folder & '\', $g_UI[0]) ; => select folder
 	If $Folder = '' Then Return
-	If $p_Type = 'BG1EE' And FileExists($Folder & '\Data\00766') Then $Folder = $Folder & '\Data\00766'; get BG1EE Beamdog-subfolder
-	If $p_Type = 'BG1EE' And FileExists($Folder & '\Data\00806') Then $Folder = $Folder & '\Data\00806'; get BG1EE Beamdog-subfolder
-	If $p_Type = 'BG2EE' And FileExists($Folder & '\Data\00783') Then $Folder = $Folder & '\Data\00783'; get BG2EE Beamdog-subfolder
-	If $p_Type = 'IWD1EE' And FileExists($Folder & '\Data\00798') Then $Folder = $Folder & '\Data\00798'; get IWD1EE Beamdog-subfolder
-	If $p_Type = 'PSTEE' And FileExists($Folder & '\Data\00827') Then $Folder = $Folder & '\Data\00827'; get PSTEE Beamdog-subfolder
+	If $p_Type = 'BG1EE' And FileExists($Folder & '\Data\00766') Then $Folder = $Folder & '\Data\00766' ; get BG1EE Beamdog-subfolder
+	If $p_Type = 'BG1EE' And FileExists($Folder & '\Data\00806') Then $Folder = $Folder & '\Data\00806' ; get BG1EE Beamdog-subfolder
+	If $p_Type = 'BG2EE' And FileExists($Folder & '\Data\00783') Then $Folder = $Folder & '\Data\00783' ; get BG2EE Beamdog-subfolder
+	If $p_Type = 'IWD1EE' And FileExists($Folder & '\Data\00798') Then $Folder = $Folder & '\Data\00798' ; get IWD1EE Beamdog-subfolder
+	If $p_Type = 'PSTEE' And FileExists($Folder & '\Data\00827') Then $Folder = $Folder & '\Data\00827' ; get PSTEE Beamdog-subfolder
 	Assign('g_' & $p_Type & 'Dir', $Folder)
 	If $p_Type = 'Down' Then
 		Local $Test = 1
@@ -462,15 +462,15 @@ Func _Misc_SelectFolder($p_Type, $p_Text)
 				$Test = 0
 				ExitLoop
 			Else
-				FileMove($g_DownDir & '\' & $File[$f], $Folder & '\' & $File[$f]); move BWS-files
+				FileMove($g_DownDir & '\' & $File[$f], $Folder & '\' & $File[$f]) ; move BWS-files
 			EndIf
 		Next
-		If $Test = 1 Then DirRemove($g_DownDir, 1); remove folder if nothing is left
+		If $Test = 1 Then DirRemove($g_DownDir, 1) ; remove folder if nothing is left
 		IniWrite($g_UsrIni, 'Options', 'Download', $Folder)
 		GUICtrlSetData($g_UI_Interact[2][3], $Folder)
 	Else
 		IniWrite($g_UsrIni, 'Options', $p_Type, $Folder)
-		If $p_Type = 'BG1' Or ($p_Type = 'BG1EE' And $g_Flags[14] = 'BG2EE') Then; BGT/EET
+		If $p_Type = 'BG1' Or ($p_Type = 'BG1EE' And $g_Flags[14] = 'BG2EE') Then ; BGT/EET
 			GUICtrlSetData($g_UI_Interact[2][1], $Folder)
 		Else
 			GUICtrlSetData($g_UI_Interact[2][2], $Folder)
@@ -503,21 +503,21 @@ Func _Misc_SetAvailableSelection()
 		$PreSelect &= '|' & StringLeft($Text, StringInStr($Text, ' - ') - 1)
 		$g_Flags[25] &= $n & '|'
 	Next
-	$Description = _GetTR($g_UI_Message, '2-L9') & '|' & StringTrimLeft($Description, 2) & '||'; => you can select gamers compilations
+	$Description = _GetTR($g_UI_Message, '2-L9') & '|' & StringTrimLeft($Description, 2) & '||' ; => you can select gamers compilations
 	If $PreSelect <> '' Then $PreSelect = StringTrimLeft($PreSelect, 1) & '|'
 	$g_Flags[25] &= '1|2|3|4|5'
-	_IniWrite($g_UI_Message, '2-I1', $PreSelect & $UI, 'O'); => preselections - adjust available preselections for later
-	Local $Split = StringSplit($PreSelect & $UI, '|'); => preselections
-	Local $SplitD = StringSplit($UI, '|'); => defaults
+	_IniWrite($g_UI_Message, '2-I1', $PreSelect & $UI, 'O') ; => preselections - adjust available preselections for later
+	Local $Split = StringSplit($PreSelect & $UI, '|') ; => preselections
+	Local $SplitD = StringSplit($UI, '|') ; => defaults
 	GUICtrlSetData($g_UI_Interact[2][4], '')
 	Local $InstallType = IniRead($g_UsrIni, 'Options', 'InstallType', '')
 	If $InstallType = '' Then ; revert to a default pre-selection if no record of most recent user selection
-;		If $g_Flags[14] = 'BWS' Then
-;			$InstallType = $Split[1]; => first custom pre-selection as default
-;		Else
-			$InstallType = $SplitD[2]; => 'recommended' pre-selection as default (#1 is minimal, #2 is recommended)
-;		EndIf
-	ElseIf StringLen($InstallType) = 1 Then; last user selection was one of the default pre-selections
+		;		If $g_Flags[14] = 'BWS' Then
+		;			$InstallType = $Split[1]; => first custom pre-selection as default
+		;		Else
+		$InstallType = $SplitD[2] ; => 'recommended' pre-selection as default (#1 is minimal, #2 is recommended)
+		;		EndIf
+	ElseIf StringLen($InstallType) = 1 Then ; last user selection was one of the default pre-selections
 		If $InstallType > UBound($SplitD) - 1 Then $InstallType = 1
 		$InstallType = $SplitD[$InstallType]
 	Else ; a custom compilation was the most recent user selection
@@ -528,8 +528,8 @@ Func _Misc_SetAvailableSelection()
 		EndIf
 		$InstallType = $Split[$InstallType]
 	EndIf
-	GUICtrlSetData($g_UI_Interact[2][4], _GetTR($g_UI_Message, '2-I1'), $InstallType); => preselections with total happyness as default
-	GUICtrlSetData($g_UI_Interact[2][6], StringReplace(StringFormat($Message, $Description), '|', @CRLF)); => folder/preselection-help
+	GUICtrlSetData($g_UI_Interact[2][4], _GetTR($g_UI_Message, '2-I1'), $InstallType) ; => preselections with total happyness as default
+	GUICtrlSetData($g_UI_Interact[2][6], StringReplace(StringFormat($Message, $Description), '|', @CRLF)) ; => folder/preselection-help
 EndFunc   ;==>_Misc_SetAvailableSelection
 
 ; ---------------------------------------------------------------------------------------------
@@ -545,15 +545,15 @@ Func _Misc_SetLang()
 		If $Var <> '' Then GUICtrlSetData($Var[$String[2]][$String[4]], StringReplace($Message[$m][1], '|', @CRLF))
 	Next
 	GUICtrlSetData($g_UI_Static[2][2], _GetGameName())
-	GUICtrlSetData($g_UI_Static[3][1], StringFormat(_GetSTR($Message, 'Static[3][1]'), $g_Flags[14])); => backup important files
-	GUICtrlSetData($g_UI_Interact[3][4], StringFormat(_GetSTR($Message, 'Interact[3][4]'), _GetGameName(), $g_Flags[14], $g_Flags[14])); => backup help text
+	GUICtrlSetData($g_UI_Static[3][1], StringFormat(_GetSTR($Message, 'Static[3][1]'), $g_Flags[14])) ; => backup important files
+	GUICtrlSetData($g_UI_Interact[3][4], StringFormat(_GetSTR($Message, 'Interact[3][4]'), _GetGameName(), $g_Flags[14], $g_Flags[14])) ; => backup help text
 	; Items that need special treatment
-	Local $Split = StringSplit(_GetTR($Message, 'Interact[1][2]'), '|'); => BWS translations
+	Local $Split = StringSplit(_GetTR($Message, 'Interact[1][2]'), '|') ; => BWS translations
 	GUICtrlSetData($g_UI_Interact[1][2], '')
-	GUICtrlSetData($g_UI_Interact[1][2], _GetTR($Message, 'Interact[1][2]'), $Split[$g_ATNum]); => BWS translations
+	GUICtrlSetData($g_UI_Interact[1][2], _GetTR($Message, 'Interact[1][2]'), $Split[$g_ATNum]) ; => BWS translations
 	GUICtrlSetData($g_UI_Interact[1][3], '')
 	$g_GameList = _GetGameList()
-	GUICtrlSetData($g_UI_Interact[1][3], $g_GameList[0][2], $g_GameList[1][2]); => installation method
+	GUICtrlSetData($g_UI_Interact[1][3], $g_GameList[0][2], $g_GameList[1][2]) ; => installation method
 	$g_Flags[3] = IniRead($g_UsrIni, 'Options', 'ModLang', '')
 	If $g_Flags[3] = '' Then
 		If $g_ATrans[$g_ATNum] <> 'EN' Then
@@ -563,35 +563,35 @@ Func _Misc_SetLang()
 		EndIf
 	EndIf
 	GUICtrlSetData($g_UI_Interact[2][5], $g_Flags[3])
-	$g_MLang = StringSplit($g_Flags[3] & ' --', ' '); reset the array with the selected languages. -- is added for mods with no text = suitable for all languages
-	Local $Split = StringSplit(_GetTR($Message, 'Menu[2][1]'), '|'); => Special|All
+	$g_MLang = StringSplit($g_Flags[3] & ' --', ' ') ; reset the array with the selected languages. -- is added for mods with no text = suitable for all languages
+	Local $Split = StringSplit(_GetTR($Message, 'Menu[2][1]'), '|') ; => Special|All
 	For $n = 1 To 2
 		For $m = 2 To 4
 			GUICtrlSetData($g_UI_Menu[$m][$n], $Split[$n])
 		Next
 	Next
-	If $g_ATrans[$g_ATNum] = 'GE' Then; show or hide kerzenburgs wiki-page button
+	If $g_ATrans[$g_ATNum] = 'GE' Then ; show or hide kerzenburgs wiki-page button
 		GUICtrlSetState($g_UI_Button[4][4], $GUI_SHOW)
 	Else
 		GUICtrlSetState($g_UI_Button[4][4], $GUI_HIDE)
 	EndIf
-	GUICtrlSetData($g_UI_Interact[10][1], _GetTR($Message, 'Interact[10][1]')); => mod/component
-	GUICtrlSetData($g_UI_Interact[11][4], _GetTR($Message, 'Interact[11][4]')); => key/variable
+	GUICtrlSetData($g_UI_Interact[10][1], _GetTR($Message, 'Interact[10][1]')) ; => mod/component
+	GUICtrlSetData($g_UI_Interact[11][4], _GetTR($Message, 'Interact[11][4]')) ; => key/variable
 	GUICtrlSetData($g_UI_Static[11][4], $g_ATrans[$g_ATNum])
-	GUICtrlSetData($g_UI_Interact[12][1], _GetTR($Message, 'Interact[12][1]')); => No.|Read description
-	GUICtrlSetData($g_UI_Interact[12][2], _GetTR($Message, 'Interact[12][2]')); => No.|Saved description
-	GUICtrlSetData($g_UI_Interact[13][1], _GetTR($Message, 'Interact[13][1]')); => Mod|Component
-	GUICtrlSetData($g_UI_Interact[13][3], _GetTR($Message, 'Interact[13][3]')); => Mod|Component|ID
-	$Split = StringSplit(_GetTR($Message, 'Interact[14][1]'), '|'); => report/remove missing mods + pause after download
+	GUICtrlSetData($g_UI_Interact[12][1], _GetTR($Message, 'Interact[12][1]')) ; => No.|Read description
+	GUICtrlSetData($g_UI_Interact[12][2], _GetTR($Message, 'Interact[12][2]')) ; => No.|Saved description
+	GUICtrlSetData($g_UI_Interact[13][1], _GetTR($Message, 'Interact[13][1]')) ; => Mod|Component
+	GUICtrlSetData($g_UI_Interact[13][3], _GetTR($Message, 'Interact[13][3]')) ; => Mod|Component|ID
+	$Split = StringSplit(_GetTR($Message, 'Interact[14][1]'), '|') ; => report/remove missing mods + pause after download
 	GUICtrlSetData($g_UI_Interact[14][1], '')
-	GUICtrlSetData($g_UI_Interact[14][1], _GetTR($Message, 'Interact[14][1]'), $Split[1]); => dito
-	$Split = StringSplit(_GetTR($Message, 'Interact[14][2]'), '|'); => report/remove missing mods + pause after extraction
+	GUICtrlSetData($g_UI_Interact[14][1], _GetTR($Message, 'Interact[14][1]'), $Split[1]) ; => dito
+	$Split = StringSplit(_GetTR($Message, 'Interact[14][2]'), '|') ; => report/remove missing mods + pause after extraction
 	GUICtrlSetData($g_UI_Interact[14][2], '')
-	GUICtrlSetData($g_UI_Interact[14][2], _GetTR($Message, 'Interact[14][2]'), $Split[1]); => dito
-	$Split = StringSplit(_GetTR($Message, 'Interact[14][3]'), '|'); => report or remove errors/warnings
+	GUICtrlSetData($g_UI_Interact[14][2], _GetTR($Message, 'Interact[14][2]'), $Split[1]) ; => dito
+	$Split = StringSplit(_GetTR($Message, 'Interact[14][3]'), '|') ; => report or remove errors/warnings
 	GUICtrlSetData($g_UI_Interact[14][3], '')
-	GUICtrlSetData($g_UI_Interact[14][3], _GetTR($Message, 'Interact[14][3]'), $Split[1]); => dito
-	GUICtrlSetData($g_UI_Interact[16][3], _GetTR($Message, 'Interact[16][3]')); => Mod|Component|ID
+	GUICtrlSetData($g_UI_Interact[14][3], _GetTR($Message, 'Interact[14][3]'), $Split[1]) ; => dito
+	GUICtrlSetData($g_UI_Interact[16][3], _GetTR($Message, 'Interact[16][3]')) ; => Mod|Component|ID
 EndFunc   ;==>_Misc_SetLang
 
 ; ---------------------------------------------------------------------------------------------
@@ -600,7 +600,7 @@ EndFunc   ;==>_Misc_SetLang
 Func _Misc_SetTab($p_Tab)
 	_PrintDebug('+' & @ScriptLineNumber & ' Calling _Misc_SetTab')
 	; ============ enable toolswitch ==================
-	If $p_Tab = 2 Then; folder
+	If $p_Tab = 2 Then ; folder
 		HotKeySet('^!c', '_Tra_Gui')
 		HotKeySet('^!m', '_Admin_ModGui')
 		HotKeySet('^!s', '_Select_Gui')
@@ -619,11 +619,11 @@ Func _Misc_SetTab($p_Tab)
 		$g_UI[3] = $WPos1[1] - $WPos0[1]
 	EndIf
 	; ============ disable std. button ================
-	If StringRegExp(String($p_Tab), '\A(8|9)\z') Then; msgbox & progressbar
+	If StringRegExp(String($p_Tab), '\A(8|9)\z') Then ; msgbox & progressbar
 		GUICtrlSetState($g_UI_Button[0][1], $GUI_DISABLE)
 		GUICtrlSetState($g_UI_Button[0][2], $GUI_DISABLE)
 		GUICtrlSetState($g_UI_Button[0][3], $GUI_DISABLE)
-	ElseIf StringRegExp($p_Tab, '\A(4|7|13|15)\z') Then; about, modadmin, conflicts/depends
+	ElseIf StringRegExp($p_Tab, '\A(4|7|13|15)\z') Then ; about, modadmin, conflicts/depends
 		GUICtrlSetState($g_UI_Button[0][1], $GUI_DISABLE)
 		GUICtrlSetState($g_UI_Button[0][2], $GUI_DISABLE)
 		GUICtrlSetState($g_UI_Button[0][3], $GUI_ENABLE)
@@ -633,15 +633,15 @@ Func _Misc_SetTab($p_Tab)
 		GUICtrlSetState($g_UI_Button[0][3], $GUI_ENABLE)
 	EndIf
 	; ========== edit names of std. button ============
-	If StringRegExp(String($p_Tab), '\A(11|12)\z') Then; modadmin, componentadmin
-		GUICtrlSetData($g_UI_Button[0][1], _GetTR($g_UI_Message, '12-B1')); => previous mod
-		GUICtrlSetData($g_UI_Button[0][2], _GetTR($g_UI_Message, '12-B2')); => next mod
+	If StringRegExp(String($p_Tab), '\A(11|12)\z') Then ; modadmin, componentadmin
+		GUICtrlSetData($g_UI_Button[0][1], _GetTR($g_UI_Message, '12-B1')) ; => previous mod
+		GUICtrlSetData($g_UI_Button[0][2], _GetTR($g_UI_Message, '12-B2')) ; => next mod
 		GUICtrlSetData($g_UI_Button[0][3], IniRead($g_TRAIni, 'UI-Buildtime', 'Button[0][1]', 'Back'))
-	ElseIf StringRegExp(String($p_Tab), '\A(4|7|13|15)\z') Then; about
+	ElseIf StringRegExp(String($p_Tab), '\A(4|7|13|15)\z') Then ; about
 		GUICtrlSetData($g_UI_Button[0][3], IniRead($g_TRAIni, 'UI-Buildtime', 'Button[0][1]', 'Back'))
-	ElseIf String($p_Tab) = 16 Then; selectadmin
-		GUICtrlSetData($g_UI_Button[0][1], _GetTR($g_UI_Message, '16-B1')); => upwards
-		GUICtrlSetData($g_UI_Button[0][2], _GetTR($g_UI_Message, '16-B2')); => downwards
+	ElseIf String($p_Tab) = 16 Then ; selectadmin
+		GUICtrlSetData($g_UI_Button[0][1], _GetTR($g_UI_Message, '16-B1')) ; => upwards
+		GUICtrlSetData($g_UI_Button[0][2], _GetTR($g_UI_Message, '16-B2')) ; => downwards
 		GUICtrlSetData($g_UI_Button[0][3], IniRead($g_TRAIni, 'UI-Buildtime', 'Button[0][1]', 'Back'))
 	Else
 		GUICtrlSetData($g_UI_Button[0][1], IniRead($g_TRAIni, 'UI-Buildtime', 'Button[0][1]', 'Back'))
@@ -649,37 +649,37 @@ Func _Misc_SetTab($p_Tab)
 		GUICtrlSetData($g_UI_Button[0][3], IniRead($g_TRAIni, 'UI-Buildtime', 'Button[0][3]', 'Exit'))
 	EndIf
 	; ============ set default button =================
-	If $p_Tab = 4 Then; advanced
+	If $p_Tab = 4 Then ; advanced
 		GUICtrlSetState($g_UI_Button[4][1], $GUI_DEFBUTTON)
 		GUICtrlSetState($g_UI_Interact[4][1], $GUI_FOCUS)
-	ElseIf $p_Tab = 6 Then; process
+	ElseIf $p_Tab = 6 Then ; process
 		GUICtrlSetState($g_UI_Button[6][1], $GUI_DEFBUTTON)
 		GUICtrlSetState($g_UI_Interact[6][5], $GUI_FOCUS)
-	ElseIf $p_Tab = 8 Then; msgbox
+	ElseIf $p_Tab = 8 Then ; msgbox
 		GUICtrlSetState($g_UI_Button[8][1], $GUI_DEFBUTTON)
 		GUICtrlSetState($g_UI_Button[8][1], $GUI_FOCUS)
-	ElseIf $p_Tab = 11 Then; modadmin
+	ElseIf $p_Tab = 11 Then ; modadmin
 		GUICtrlSetState($g_UI_Interact[11][5], $GUI_FOCUS)
-	ElseIf $p_Tab = 12 Then; componentadmin
+	ElseIf $p_Tab = 12 Then ; componentadmin
 		GUICtrlSetState($g_UI_Button[12][3], $GUI_DEFBUTTON)
 		GUICtrlSetState($g_UI_Interact[12][1], $GUI_FOCUS)
-	ElseIf $p_Tab = 13 Then; conflicts/depends
+	ElseIf $p_Tab = 13 Then ; conflicts/depends
 		GUICtrlSetState($g_UI_Button[13][2], $GUI_DEFBUTTON)
 		GUICtrlSetState($g_UI_Interact[13][1], $GUI_FOCUS)
 	Else
 		GUICtrlSetState($g_UI_Button[0][2], $GUI_DEFBUTTON)
 	EndIf
 	; ========== hide/show msgbox icon  ===============
-	If $p_Tab = 8 Then; msgbox
-		GUICtrlSetState($g_UI_Static[8][1], $GUI_SHOW); used to avoid overlay-effects
+	If $p_Tab = 8 Then ; msgbox
+		GUICtrlSetState($g_UI_Static[8][1], $GUI_SHOW) ; used to avoid overlay-effects
 	Else
 		GUICtrlSetState($g_UI_Static[8][1], $GUI_HIDE)
 	EndIf
 	; ============ switch to tab  =====================
-	Local $Current = GUICtrlRead($g_UI_Seperate[0][0]) + 1; avoid loops for updates during info-screen later
-	If GUICtrlRead($g_UI_Seperate[0][0]) + 1 <> $p_Tab Then GUICtrlSetState($g_UI_Seperate[$p_Tab][0], $GUI_SHOW); don't switch if $p_tab is current one to avoid flickering
+	Local $Current = GUICtrlRead($g_UI_Seperate[0][0]) + 1 ; avoid loops for updates during info-screen later
+	If GUICtrlRead($g_UI_Seperate[0][0]) + 1 <> $p_Tab Then GUICtrlSetState($g_UI_Seperate[$p_Tab][0], $GUI_SHOW) ; don't switch if $p_tab is current one to avoid flickering
 	; ============ show/hide picture ==================
-	If StringRegExp(String($p_Tab), '\A(1|7)\z') Then; greetings, about
+	If StringRegExp(String($p_Tab), '\A(1|7)\z') Then ; greetings, about
 		$g_Flags[15] = 1
 		Local $WPos0 = WinGetPos($g_UI[0])
 		Local $CPos = ControlGetPos($g_UI[0], '', $g_UI_Static[1][4])
@@ -695,16 +695,16 @@ Func _Misc_SetTab($p_Tab)
 	EndIf
 	; ============ register custom msgs ===============
 	GUIRegisterMsg($WM_NOTIFY, '')
-	If $p_Tab = 4 Then; advanced
+	If $p_Tab = 4 Then ; advanced
 		$g_Flags[8] = 1
 		GUIRegisterMsg($WM_NOTIFY, '__TristateTreeView_WM_Notify')
 	Else
 		$g_Flags[8] = 0
-		If $p_Tab = 10 Then GUIRegisterMsg($WM_NOTIFY, '_Depend_WM_Notify'); solve dependencies
-		If $p_Tab = 11 Then GUIRegisterMsg($WM_NOTIFY, '_Admin_Mod_WM_Notify'); admin mods
-		If $p_Tab = 12 Then GUIRegisterMsg($WM_NOTIFY, '_Tra_WM_Notify'); admin component-translations
-		If $p_Tab = 13 Then GUIRegisterMsg($WM_NOTIFY, '_Dep_WM_Notify'); admin dependencies
-		If $p_Tab = 16 Then GUIRegisterMsg($WM_NOTIFY, '_Select_WM_Notify'); admin order
+		If $p_Tab = 10 Then GUIRegisterMsg($WM_NOTIFY, '_Depend_WM_Notify') ; solve dependencies
+		If $p_Tab = 11 Then GUIRegisterMsg($WM_NOTIFY, '_Admin_Mod_WM_Notify') ; admin mods
+		If $p_Tab = 12 Then GUIRegisterMsg($WM_NOTIFY, '_Tra_WM_Notify') ; admin component-translations
+		If $p_Tab = 13 Then GUIRegisterMsg($WM_NOTIFY, '_Dep_WM_Notify') ; admin dependencies
+		If $p_Tab = 16 Then GUIRegisterMsg($WM_NOTIFY, '_Select_WM_Notify') ; admin order
 	EndIf
 	GUISetState(@SW_SHOW, $g_UI[0])
 EndFunc   ;==>_Misc_SetTab
@@ -713,14 +713,14 @@ EndFunc   ;==>_Misc_SetTab
 ; Change the entries on the tip-screen. Stage 0 = Initial / 1 = Question screen
 ; ---------------------------------------------------------------------------------------------
 Func _Misc_SetTip($p_Stage = 1)
-	Local $Value = GUICtrlRead($g_UI_Interact[1][3]); get current value so function works if game-type is changed
+	Local $Value = GUICtrlRead($g_UI_Interact[1][3]) ; get current value so function works if game-type is changed
 	For $g = 1 To $g_GameList[0][0]
 		If $Value = $g_GameList[$g][2] Then ExitLoop
 	Next
-	If $p_Stage <> 0 Then GUICtrlSetData($g_UI_Interact[1][1], StringReplace(IniRead($g_ProgDir & '\Config\' & $g_GameList[$g][0] & '\Translation-' & $g_ATrans[$g_ATNum] & '.ini', 'UI-RunTime', '1-L2', ''), '|', @CRLF)); => questionary (did you have installed...)
-	GUICtrlSetData($g_UI_Static[2][2], _GetGameName()); game-folder
-	GUICtrlSetData($g_UI_Static[3][1], StringFormat(StringReplace(IniRead($g_TRAIni, 'UI-Buildtime', 'Static[3][1]', ''), '|', @CRLF), $g_GameList[$g][1])); => backup hint
-	GUICtrlSetData($g_UI_Interact[3][4], StringFormat(StringReplace(IniRead($g_TRAIni, 'UI-Buildtime', 'Interact[3][4]', ''), '|', @CRLF), _GetGameName(), $g_GameList[$g][1], $g_GameList[$g][1])); => backup help
+	If $p_Stage <> 0 Then GUICtrlSetData($g_UI_Interact[1][1], StringReplace(IniRead($g_ProgDir & '\Config\' & $g_GameList[$g][0] & '\Translation-' & $g_ATrans[$g_ATNum] & '.ini', 'UI-RunTime', '1-L2', ''), '|', @CRLF)) ; => questionary (did you have installed...)
+	GUICtrlSetData($g_UI_Static[2][2], _GetGameName()) ; game-folder
+	GUICtrlSetData($g_UI_Static[3][1], StringFormat(StringReplace(IniRead($g_TRAIni, 'UI-Buildtime', 'Static[3][1]', ''), '|', @CRLF), $g_GameList[$g][1])) ; => backup hint
+	GUICtrlSetData($g_UI_Interact[3][4], StringFormat(StringReplace(IniRead($g_TRAIni, 'UI-Buildtime', 'Interact[3][4]', ''), '|', @CRLF), _GetGameName(), $g_GameList[$g][1], $g_GameList[$g][1])) ; => backup help
 EndFunc   ;==>_Misc_SetTip
 
 ; ---------------------------------------------------------------------------------------------
@@ -731,9 +731,9 @@ Func _Misc_SetWelcomeScreen($p_String)
 	_PrintDebug('+' & @ScriptLineNumber & ' Calling _Misc_SetWelcomeScreen')
 	Local $Current = GUICtrlRead($g_UI_Seperate[0][0]) + 1
 	Local $State = BitAND(GUICtrlGetState($g_UI_Interact[1][2]), $GUI_HIDE)
-	If $p_String = '+' Then; we're going forwards
-		If $State Then; jump from install selection to folder selection
-			Local $Method = GUICtrlRead($g_UI_Interact[1][3]); look if install-method changed
+	If $p_String = '+' Then ; we're going forwards
+		If $State Then ; jump from install selection to folder selection
+			Local $Method = GUICtrlRead($g_UI_Interact[1][3]) ; look if install-method changed
 			For $g = 1 To $g_GameList[0][0]
 				If $Method = $g_GameList[$g][2] Then
 					If $g_Flags[14] <> $g_GameList[$g][1] Then
@@ -742,7 +742,7 @@ Func _Misc_SetWelcomeScreen($p_String)
 						_Misc_SetAvailableSelection()
 						IniWrite($g_UsrIni, 'Options', 'AppType', $g_GameList[$g][0] & ':' & $g_Flags[14])
 						$g_Flags[10] = 1
-					Else; make sure the correct config-dir is used (rare case if you use something, go back, change game, go back, go forth, revert game, continue)
+					Else ; make sure the correct config-dir is used (rare case if you use something, go back, change game, go back, go forth, revert game, continue)
 						_Misc_Set_GConfDir($g_GameList[$g][0])
 					EndIf
 				EndIf
@@ -756,37 +756,37 @@ Func _Misc_SetWelcomeScreen($p_String)
 				$g_Flags[10] = 0
 			EndIf
 			_Misc_SetTab(2)
-		Else; jump from welcome to install selection
+		Else ; jump from welcome to install selection
 			If $g_Flags[10] = 2 Then IniWrite($g_UsrIni, 'Options', 'AppLang', $g_ATrans[$g_ATNum])
-			GUICtrlSetData($g_UI_Static[1][1], _GetTR($g_UI_Message, '1-L1')); => important notes
-			GUICtrlSetData($g_UI_Interact[1][1], StringReplace(IniRead($g_GConfDir & '\Translation-' & $g_ATrans[$g_ATNum] & '.ini', 'UI-RunTime', '1-L2', ''), '|', @CRLF)); => questionary (did you have installed...)
-			GUICtrlSetState($g_UI_Interact[1][2], $GUI_HIDE); combobox
-			GUICtrlSetState($g_UI_Static[1][2], $GUI_HIDE); language label
-			GUICtrlSetState($g_UI_Interact[1][3], $GUI_SHOW); combobox
-			GUICtrlSetState($g_UI_Static[1][3], $GUI_SHOW); install label
+			GUICtrlSetData($g_UI_Static[1][1], _GetTR($g_UI_Message, '1-L1')) ; => important notes
+			GUICtrlSetData($g_UI_Interact[1][1], StringReplace(IniRead($g_GConfDir & '\Translation-' & $g_ATrans[$g_ATNum] & '.ini', 'UI-RunTime', '1-L2', ''), '|', @CRLF)) ; => questionary (did you have installed...)
+			GUICtrlSetState($g_UI_Interact[1][2], $GUI_HIDE) ; combobox
+			GUICtrlSetState($g_UI_Static[1][2], $GUI_HIDE) ; language label
+			GUICtrlSetState($g_UI_Interact[1][3], $GUI_SHOW) ; combobox
+			GUICtrlSetState($g_UI_Static[1][3], $GUI_SHOW) ; install label
 			GUICtrlSetState($g_UI_Button[0][1], $GUI_ENABLE)
 			Return 0
 		EndIf
-	Else; not '+' => we're going back, not forward
-		If $Current = 2 Then; jump back from folder selection to install selection
-			GUICtrlSetData($g_UI_Static[1][1], _GetTR($g_UI_Message, '1-L1')); => important notes
-			GUICtrlSetData($g_UI_Interact[1][1], StringReplace(IniRead($g_GConfDir & '\Translation-' & $g_ATrans[$g_ATNum] & '.ini', 'UI-RunTime', '1-L2', ''), '|', @CRLF)); => questionary (did you have installed...)
+	Else ; not '+' => we're going back, not forward
+		If $Current = 2 Then ; jump back from folder selection to install selection
+			GUICtrlSetData($g_UI_Static[1][1], _GetTR($g_UI_Message, '1-L1')) ; => important notes
+			GUICtrlSetData($g_UI_Interact[1][1], StringReplace(IniRead($g_GConfDir & '\Translation-' & $g_ATrans[$g_ATNum] & '.ini', 'UI-RunTime', '1-L2', ''), '|', @CRLF)) ; => questionary (did you have installed...)
 			_Misc_SetTab(1)
-		ElseIf $State Then; jump back from install selection to welcome
-			Local $Method = GUICtrlRead($g_UI_Interact[1][3]); look if install-method changed
+		ElseIf $State Then ; jump back from install selection to welcome
+			Local $Method = GUICtrlRead($g_UI_Interact[1][3]) ; look if install-method changed
 			For $g = 1 To $g_GameList[0][0]
 				If $Method = $g_GameList[$g][2] Then
 					If $g_Flags[14] <> $g_GameList[$g][1] Then _Misc_Set_GConfDir($g_GameList[$g][0])
 				EndIf
 			Next
-			GUICtrlSetData($g_UI_Static[1][1], StringReplace(IniRead($g_TRAIni, 'UI-Buildtime', 'Static[1][1]', ''), '|', @CRLF)); => important notes
-			GUICtrlSetData($g_UI_Interact[1][1], StringReplace(IniRead($g_TRAIni, 'UI-Buildtime', 'Interact[1][1]', ''), '|', @CRLF)); => questionary (did you have installed...)
-			GUICtrlSetState($g_UI_Interact[1][2], $GUI_SHOW); combobox
-			GUICtrlSetState($g_UI_Static[1][2], $GUI_SHOW); language label
-			GUICtrlSetState($g_UI_Interact[1][3], $GUI_HIDE); combobox
-			GUICtrlSetState($g_UI_Static[1][3], $GUI_HIDE); install label
+			GUICtrlSetData($g_UI_Static[1][1], StringReplace(IniRead($g_TRAIni, 'UI-Buildtime', 'Static[1][1]', ''), '|', @CRLF)) ; => important notes
+			GUICtrlSetData($g_UI_Interact[1][1], StringReplace(IniRead($g_TRAIni, 'UI-Buildtime', 'Interact[1][1]', ''), '|', @CRLF)) ; => questionary (did you have installed...)
+			GUICtrlSetState($g_UI_Interact[1][2], $GUI_SHOW) ; combobox
+			GUICtrlSetState($g_UI_Static[1][2], $GUI_SHOW) ; language label
+			GUICtrlSetState($g_UI_Interact[1][3], $GUI_HIDE) ; combobox
+			GUICtrlSetState($g_UI_Static[1][3], $GUI_HIDE) ; install label
 			GUICtrlSetState($g_UI_Button[0][1], $GUI_DISABLE)
-		Else; the language-selection is already shown, can't go any further 
+		Else ; the language-selection is already shown, can't go any further
 		EndIf
 	EndIf
 EndFunc   ;==>_Misc_SetWelcomeScreen
@@ -798,57 +798,57 @@ Func _Misc_SwitchGUIToInstallMethod()
 	_PrintDebug('+' & @ScriptLineNumber & ' Calling _Misc_SwitchGUIToInstallMethod')
 	Local $Message = IniReadSection($g_TRAIni, 'UI-Buildtime')
 	Local $State = $GUI_ENABLE
-	Local $HideEET = 0; set this to 0 to enable EET
-	Local $found = 0
+	Local $HideEET = 0 ; set this to 0 to enable EET
+	Local $Found = 0
 	For $g = 1 To $g_GameList[0][0]
 		If $g_Flags[14] = $g_GameList[$g][1] Then
-			$found = 1
+			$Found = 1
 			ExitLoop
 		EndIf
 	Next
-	If $found = 0 Then
-		_PrintDebug('There is a problem with the internal configuration files. The BWS\Config\User.ini indicates that your current game type is "'&$g_Flags[14]&'" but no matching configuration was found. Please try restarting BWS using "with updates" to get the latest files; if that fails, please report this problem on one of the BiG World Setup support forums.', 1)
+	If $Found = 0 Then
+		_PrintDebug('There is a problem with the internal configuration files. The BWS\Config\User.ini indicates that your current game type is "' & $g_Flags[14] & '" but no matching configuration was found. Please try restarting BWS using "with updates" to get the latest files; if that fails, please report this problem on one of the BiG World Setup support forums.', 1)
 		Exit
 	EndIf
 	_Misc_Set_GConfDir($g_GameList[$g][0])
 	GUICtrlSetData($g_UI_Interact[1][3], $g_GameList[$g][2])
 	GUICtrlSetState($g_UI_Static[2][1], $GUI_HIDE)
-	GUICtrlSetState($g_UI_Interact[2][1], $GUI_HIDE); hide BG1/BG1EE-for-BGT/EET-folder by default
+	GUICtrlSetState($g_UI_Interact[2][1], $GUI_HIDE) ; hide BG1/BG1EE-for-BGT/EET-folder by default
 	GUICtrlSetState($g_UI_Button[2][1], $GUI_HIDE)
 	GUICtrlSetState($g_UI_Static[2][2], $GUI_SHOW)
-	GUICtrlSetState($g_UI_Interact[2][2], $GUI_SHOW); show BG1EE/BG2/BG2EE/IWD1/IWD2/PST folder by default
+	GUICtrlSetState($g_UI_Interact[2][2], $GUI_SHOW) ; show BG1EE/BG2/BG2EE/IWD1/IWD2/PST folder by default
 	GUICtrlSetState($g_UI_Button[2][2], $GUI_SHOW)
 	GUICtrlSetPos($g_UI_Static[2][1], 30, 85, 370, 15)
-	GUICtrlSetPos($g_UI_Interact[2][1], 30, 100, 300, 20); BG1/BG1EE-for-BGT/EET-folder default position
+	GUICtrlSetPos($g_UI_Interact[2][1], 30, 100, 300, 20) ; BG1/BG1EE-for-BGT/EET-folder default position
 	GUICtrlSetPos($g_UI_Button[2][1], 350, 100, 50, 20)
 	GUICtrlSetPos($g_UI_Static[2][2], 30, 135, 370, 15)
-	GUICtrlSetPos($g_UI_Interact[2][2], 30, 150, 300, 20); BG2/BG2EE/IWD1/IWD2/PST folder default position
+	GUICtrlSetPos($g_UI_Interact[2][2], 30, 150, 300, 20) ; BG2/BG2EE/IWD1/IWD2/PST folder default position
 	GUICtrlSetPos($g_UI_Button[2][2], 350, 150, 50, 20)
 	GUICtrlSetPos($g_UI_Static[2][3], 30, 190, 370, 15)
-	GUICtrlSetPos($g_UI_Interact[2][3], 30, 205, 300, 20); download folder position same for all game types
+	GUICtrlSetPos($g_UI_Interact[2][3], 30, 205, 300, 20) ; download folder position same for all game types
 	GUICtrlSetPos($g_UI_Button[2][3], 350, 205, 50, 20)
-	If StringRegExp($g_Flags[14], 'BWS|BWP|BG2EE') Then; includes BGT/EET
-		If $g_Flags[14] = 'BG2EE' Then; BG2EE or EET
+	If StringRegExp($g_Flags[14], 'BWS|BWP|BG2EE') Then ; includes BGT/EET
+		If $g_Flags[14] = 'BG2EE' Then ; BG2EE or EET
 			If $HideEET Then
 				GUICtrlSetState($g_UI_Static[2][1], $GUI_HIDE)
-				GUICtrlSetState($g_UI_Interact[2][1], $GUI_HIDE); hide BG1EE folder
+				GUICtrlSetState($g_UI_Interact[2][1], $GUI_HIDE) ; hide BG1EE folder
 				GUICtrlSetState($g_UI_Button[2][1], $GUI_HIDE)
-				GUICtrlSetData($g_UI_Interact[2][1], '-'); disable BG1EE-folder tests
-			Else; EET is enabled
+				GUICtrlSetData($g_UI_Interact[2][1], '-') ; disable BG1EE-folder tests
+			Else ; EET is enabled
 				GUICtrlSetData($g_UI_Static[2][1], "Baldur's Gate I: Enhanced Edition, put '-' if you want only BG2:EE")
 				GUICtrlSetState($g_UI_Static[2][1], $GUI_SHOW)
-				GUICtrlSetState($g_UI_Interact[2][1], $GUI_SHOW); show BG1EE-for-EET folder
+				GUICtrlSetState($g_UI_Interact[2][1], $GUI_SHOW) ; show BG1EE-for-EET folder
 				GUICtrlSetState($g_UI_Button[2][1], $GUI_SHOW)
 				_Test_GetGamePath('BG1EE')
 				GUICtrlSetData($g_UI_Interact[2][1], $g_BG1EEDir)
 			EndIf
 			_Test_GetGamePath('BG2EE')
-			$g_GameDir = $g_BG2EEDir; use BG2EEDir for now even if EET is enabled
+			$g_GameDir = $g_BG2EEDir ; use BG2EEDir for now even if EET is enabled
 			GUICtrlSetData($g_UI_Interact[2][2], $g_BG2EEDir)
-		Else; BWS/BWP - includes BGT
+		Else ; BWS/BWP - includes BGT
 			GUICtrlSetData($g_UI_Static[2][1], "Baldur's Gate I, put '-' if you want only BG2")
 			GUICtrlSetState($g_UI_Static[2][1], $GUI_SHOW)
-			GUICtrlSetState($g_UI_Interact[2][1], $GUI_SHOW); show BG1-for-BGT folder
+			GUICtrlSetState($g_UI_Interact[2][1], $GUI_SHOW) ; show BG1-for-BGT folder
 			GUICtrlSetState($g_UI_Button[2][1], $GUI_SHOW)
 			_Test_GetGamePath('BG1')
 			_Test_GetGamePath('BG2')
@@ -857,31 +857,31 @@ Func _Misc_SwitchGUIToInstallMethod()
 			GUICtrlSetData($g_UI_Interact[2][2], $g_BG2Dir)
 		EndIf
 		If $g_Flags[14] = 'BWP' Then
-			$g_Flags[21] = 1; sort components according to PDF
+			$g_Flags[21] = 1 ; sort components according to PDF
 			$State = $GUI_DISABLE
 			GUICtrlSetState($g_UI_Menu[1][16], $GUI_CHECKED)
-			GUICtrlSetState($g_UI_Interact[14][8], $GUI_UNCHECKED); will be asked by batch
-		Else;If StringRegExp($g_Flags[14], 'BWS|BG2EE)' Then
-			$g_Flags[21] = 0; sort components by theme
+			GUICtrlSetState($g_UI_Interact[14][8], $GUI_UNCHECKED) ; will be asked by batch
+		Else ;If StringRegExp($g_Flags[14], 'BWS|BG2EE)' Then
+			$g_Flags[21] = 0 ; sort components by theme
 			GUICtrlSetState($g_UI_Menu[1][16], $GUI_UNCHECKED)
 		EndIf
-;	ElseIf $g_Flags[14] = 'BG1EE' Then; hide BG2EE folder and reposition GUI-controls
-;		GUICtrlSetState($g_UI_Static[2][2], $GUI_HIDE)
-;		GUICtrlSetState($g_UI_Interact[2][2], $GUI_HIDE); hide BG2EE folder
-;		GUICtrlSetState($g_UI_Button[2][2], $GUI_HIDE)
-;		GUICtrlSetData($g_UI_Interact[2][2], '-'); disable BG2EE-folder tests
-;		GUICtrlSetPos($g_UI_Static[2][1], 30, 135, 370, 15)
-;		GUICtrlSetPos($g_UI_Interact[2][1], 30, 150, 300, 20); move BG1EE folder down
-;		GUICtrlSetPos($g_UI_Button[2][1], 350, 150, 50, 20)
-;		GUICtrlSetData($g_UI_Static[2][1], "Baldur's Gate I: Enhanced Edition")
-;		GUICtrlSetState($g_UI_Static[2][1], $GUI_SHOW)
-;		GUICtrlSetState($g_UI_Interact[2][1], $GUI_SHOW); show BG1EE folder
-;		GUICtrlSetState($g_UI_Button[2][1], $GUI_SHOW)
-;		_Test_GetGamePath('BG1EE')
-;		$g_GameDir = $g_BG1EEDir
-;		GUICtrlSetData($g_UI_Interact[2][1], $g_BG1EEDir)
-	Else; for other game types, just disable BG1/BG1EE-for-BGT/EET-folder tests
-		GUICtrlSetData($g_UI_Interact[2][1], '-'); disable BG1/BG1EE-for-BGT/EET-folder tests
+		;	ElseIf $g_Flags[14] = 'BG1EE' Then; hide BG2EE folder and reposition GUI-controls
+		;		GUICtrlSetState($g_UI_Static[2][2], $GUI_HIDE)
+		;		GUICtrlSetState($g_UI_Interact[2][2], $GUI_HIDE); hide BG2EE folder
+		;		GUICtrlSetState($g_UI_Button[2][2], $GUI_HIDE)
+		;		GUICtrlSetData($g_UI_Interact[2][2], '-'); disable BG2EE-folder tests
+		;		GUICtrlSetPos($g_UI_Static[2][1], 30, 135, 370, 15)
+		;		GUICtrlSetPos($g_UI_Interact[2][1], 30, 150, 300, 20); move BG1EE folder down
+		;		GUICtrlSetPos($g_UI_Button[2][1], 350, 150, 50, 20)
+		;		GUICtrlSetData($g_UI_Static[2][1], "Baldur's Gate I: Enhanced Edition")
+		;		GUICtrlSetState($g_UI_Static[2][1], $GUI_SHOW)
+		;		GUICtrlSetState($g_UI_Interact[2][1], $GUI_SHOW); show BG1EE folder
+		;		GUICtrlSetState($g_UI_Button[2][1], $GUI_SHOW)
+		;		_Test_GetGamePath('BG1EE')
+		;		$g_GameDir = $g_BG1EEDir
+		;		GUICtrlSetData($g_UI_Interact[2][1], $g_BG1EEDir)
+	Else ; for other game types, just disable BG1/BG1EE-for-BGT/EET-folder tests
+		GUICtrlSetData($g_UI_Interact[2][1], '-') ; disable BG1/BG1EE-for-BGT/EET-folder tests
 		_Test_GetGamePath($g_Flags[14])
 		$g_GameDir = Eval('g_' & $g_Flags[14] & 'Dir')
 		GUICtrlSetData($g_UI_Interact[2][2], $g_GameDir)
@@ -890,20 +890,20 @@ Func _Misc_SwitchGUIToInstallMethod()
 	GUICtrlSetColor($g_UI_Button[2][1], Default)
 	GUICtrlSetBkColor($g_UI_Button[2][2], Default)
 	GUICtrlSetColor($g_UI_Button[2][2], Default)
-	GUICtrlSetData($g_UI_Static[2][2], _GetGameName()); game-folder
-	GUICtrlSetData($g_UI_Static[3][1], StringFormat(_GetSTR($Message, 'Static[3][1]'), $g_Flags[14])); => backup hint
-	GUICtrlSetData($g_UI_Interact[3][4], StringFormat(_GetSTR($Message, 'Interact[3][4]'), _GetGameName(), $g_Flags[14], $g_Flags[14])); => backup help
+	GUICtrlSetData($g_UI_Static[2][2], _GetGameName()) ; game-folder
+	GUICtrlSetData($g_UI_Static[3][1], StringFormat(_GetSTR($Message, 'Static[3][1]'), $g_Flags[14])) ; => backup hint
+	GUICtrlSetData($g_UI_Interact[3][4], StringFormat(_GetSTR($Message, 'Interact[3][4]'), _GetGameName(), $g_Flags[14], $g_Flags[14])) ; => backup help
 	$g_ModIni = $g_GConfDir & '\Mod.ini'
 	_GetGlobalData()
 	$g_Setups = _CreateList('s')
-	If Not StringRegExp($g_Flags[14], 'BWS|BWP') Then GUICtrlSetState($g_UI_Interact[14][8], $GUI_HIDE); hide additional textpatch-option
-	GUICtrlSetState($g_UI_Interact[14][3], $State); install options
-	GUICtrlSetState($g_UI_Interact[14][4], $State); install in groups
-	GUICtrlSetState($g_UI_Interact[14][6], $State); desktop width
-	GUICtrlSetState($g_UI_Interact[14][7], $State); desktop height
-	GUICtrlSetState($g_UI_Interact[14][8], $State); install additional textpatch
+	If Not StringRegExp($g_Flags[14], 'BWS|BWP') Then GUICtrlSetState($g_UI_Interact[14][8], $GUI_HIDE) ; hide additional textpatch-option
+	GUICtrlSetState($g_UI_Interact[14][3], $State) ; install options
+	GUICtrlSetState($g_UI_Interact[14][4], $State) ; install in groups
+	GUICtrlSetState($g_UI_Interact[14][6], $State) ; desktop width
+	GUICtrlSetState($g_UI_Interact[14][7], $State) ; desktop height
+	GUICtrlSetState($g_UI_Interact[14][8], $State) ; install additional textpatch
 	If StringInStr($g_Flags[14], 'EE') Then
-		$State = $GUI_HIDE; BG1EE/BG2EE doesn't need widescreen mod for bigger resolutions
+		$State = $GUI_HIDE ; BG1EE/BG2EE doesn't need widescreen mod for bigger resolutions
 	Else
 		$State = $GUI_SHOW
 	EndIf
@@ -919,7 +919,7 @@ Func _Misc_SwitchLang()
 	_PrintDebug('+' & @ScriptLineNumber & ' Calling _Misc_SwitchLang')
 	Local $OldNum = $g_ATNum
 	Local $Lang = GUICtrlRead($g_UI_Interact[1][2])
-	Local $Split = StringSplit(_GetTR($g_UI_Message, '1-I1'), '|'); => available translations for the BWS
+	Local $Split = StringSplit(_GetTR($g_UI_Message, '1-I1'), '|') ; => available translations for the BWS
 	For $s = 1 To $Split[0]
 		If $Lang = $Split[$s] Then $g_ATNum = $s
 	Next
@@ -929,7 +929,7 @@ Func _Misc_SwitchLang()
 		$g_UI_Message = IniReadSection($g_TRAIni, 'UI-Runtime')
 		$g_Flags[10] = 1
 		_Misc_SetLang()
-		_Misc_SetAvailableSelection(); show preselection-descriptions
+		_Misc_SetAvailableSelection() ; show preselection-descriptions
 	EndIf
 EndFunc   ;==>_Misc_SwitchLang
 
@@ -937,31 +937,31 @@ EndFunc   ;==>_Misc_SwitchLang
 ; Enable or disable Widescreen checkbox if mod is deselected and vice versa
 ; ---------------------------------------------------------------------------------------------
 Func _Misc_SwitchWideScreen($p_UserClicked = 0)
-	If StringInStr($g_Flags[14], 'EE') Then Return; Widescreen already built into BG1EE/BG2EE
+	If StringInStr($g_Flags[14], 'EE') Then Return ; Widescreen already built into BG1EE/BG2EE
 	Local $p_ID = $g_Flags[22]
 	Local $p_State = $g_CentralArray[$p_ID][9]
 	;FileWrite($g_LogFile, '_Misc_SwitchWideScreen '&$p_UserClicked&' $p_State = '&$p_State&@CRLF)
-	If $p_UserClicked = 1 Then; read checkbox state and update the mod and UI appropriately
+	If $p_UserClicked = 1 Then ; read checkbox state and update the mod and UI appropriately
 		If GUICtrlRead($g_UI_Interact[14][5]) = $GUI_CHECKED Then
 			If $p_State = 0 Then _AI_SetSTD_Enable($p_ID)
 			$p_State = 1
-		Else;If GUICtrlRead($g_UI_Interact[14][5]) = $GUI_UNCHECKED Then
+		Else ;If GUICtrlRead($g_UI_Interact[14][5]) = $GUI_UNCHECKED Then
 			If $p_State = 1 Then _AI_SetSTD_Disable($p_ID)
 			$p_State = 0
 		EndIf
-	ElseIf $p_State = 0 Then; update checkbox state to match the mod state
+	ElseIf $p_State = 0 Then ; update checkbox state to match the mod state
 		GUICtrlSetState($g_UI_Interact[14][5], $GUI_UNCHECKED)
 	Else
 		GUICtrlSetState($g_UI_Interact[14][5], $GUI_CHECKED)
 	EndIf
 	If $p_State = 1 Then
-		If $g_Flags[14] <> 'BWP' Then; this is not a batch install
+		If $g_Flags[14] <> 'BWP' Then ; this is not a batch install
 			GUICtrlSetState($g_UI_Interact[14][6], $GUI_Enable)
 			GUICtrlSetState($g_UI_Interact[14][7], $GUI_Enable)
 			If GUICtrlRead($g_UI_Interact[14][6]) = '' Then GUICtrlSetData($g_UI_Interact[14][6], @DesktopWidth)
 			If GUICtrlRead($g_UI_Interact[14][7]) = '' Then GUICtrlSetData($g_UI_Interact[14][7], @DesktopHeight)
 		EndIf
-	Else;If $p_State = 0 Then
+	Else ;If $p_State = 0 Then
 		GUICtrlSetState($g_UI_Interact[14][6], $GUI_DISABLE)
 		GUICtrlSetState($g_UI_Interact[14][7], $GUI_DISABLE)
 	EndIf
