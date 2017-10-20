@@ -25,15 +25,15 @@ Func Au3Net($p_Num = 0)
 ; ---------------------------------------------------------------------------------------------
 	For $d = 1 To $g_CurrentPackages[0][0] ; loop through the elements of an array
 		If $p_Num = 2 And _IniRead($Fault, $g_CurrentPackages[$d][0], '') = '' Then ContinueLoop ; rerun - continue if download did not fail
-		$ReadSection = IniReadSection($g_MODIni, $g_CurrentPackages[$d][0])
+		Local $ReadSection = IniReadSection($g_MODIni, $g_CurrentPackages[$d][0])
 		$Prefix[3] = _GetTra($ReadSection, 'T') & '-Add' ; adjust the language-addon
 		For $p = 1 To 3
 			If $g_Flags[0] = 0 Then ; the exit button was pressed
 				Exit
 			EndIf
-			$URL = _IniRead($ReadSection, $Prefix[$p] & 'Down', 'Manual')
-			$File = _IniRead($ReadSection, $Prefix[$p] & 'Save', '') ; filename
-			$Text = FileRead($g_LogFile)
+			Local $URL = _IniRead($ReadSection, $Prefix[$p] & 'Down', 'Manual')
+			Local $File = _IniRead($ReadSection, $Prefix[$p] & 'Save', '') ; filename
+			Local $Text = FileRead($g_LogFile)
 			If StringInStr($Text, StringFormat(_GetTR($Message, 'L5'), $File)) Or StringInStr($Text, $File & ' ' & _GetTR($Message, 'L7')) Then ; => download successful / has been done before - skip downloads that the log stated as done
 				$Sizes[0][2] += _IniRead($ReadSection, $Prefix[$p] & 'Size', 0) ; add size to progressbar
 				ContinueLoop
@@ -106,7 +106,7 @@ Func Au3Net($p_Num = 0)
 				ContinueLoop
 			EndIf
 			$d = StringLeft(($g_Flags[23] + 1) / 2, 1) ; the queue to work on
-			$List = ProcessList('wget.exe') ; check wget-process only so we don't kill other processes
+			Local $List = ProcessList('wget.exe') ; check wget-process only so we don't kill other processes
 			For $l = 1 To $List[0][0]
 				If $DArray[$DSlot[$d]][7] = $List[$l][1] Then
 					GUICtrlSetColor($g_UI_Interact[5][$d + 1], Default) ; repaint progress-bar in case there was an error on this queue before
@@ -114,7 +114,7 @@ Func Au3Net($p_Num = 0)
 					GUICtrlSetCursor($g_UI_Static[5][$d + 2], -1)
 					ProcessClose($DArray[$DSlot[$d]][7])
 					ProcessWaitClose($DArray[$DSlot[$d]][7])
-					$Result = StdoutRead($DArray[$DSlot[$d]][7]) ; read the output of wget...
+					Local $Result = StdoutRead($DArray[$DSlot[$d]][7]) ; read the output of wget...
 					$Result &= StderrRead($DArray[$DSlot[$d]][7])
 					FileWrite($g_LogFile, @CRLF & _StringVerifyExtAscII($Result) & @CRLF) ; ... and write it into the log
 					$DArray[$DSlot[$d]][7] = ''
@@ -213,9 +213,9 @@ Func Au3Net($p_Num = 0)
 			If $DSlot[$d] = '' Then ; no DArray-entry assigned to that slot
 				If $IsPaused = 1 Then ContinueLoop
 				If $DpS[0][1] = '|1|' Then ; only shs-queue left. bws may use more than one download
-					$Queue = 1
+					Local $Queue = 1
 				Else
-					$Available = $DpS[0][1] ; get current unused queues
+					Local $Available = $DpS[0][1] ; get current unused queues
 					For $s = 1 To 5
 						If $DSlot[$s] <> '' Then $Available = StringReplace($Available, '|' & $DArray[$DSlot[$s]][6] & '|', '|')
 					Next
@@ -291,7 +291,7 @@ Func Au3Net($p_Num = 0)
 					;	ContinueLoop
 					;EndIf
 					$DpS[$DArray[$DSlot[$d]][6]][1] = StringReplace($DpS[$DArray[$DSlot[$d]][6]][1], '|' & $DSlot[$d] & '|', '|') ; remove from queue
-					$Error = IniRead($g_BWSIni, 'Faults', $DArray[$DSlot[$d]][2], '')
+					Local $Error = IniRead($g_BWSIni, 'Faults', $DArray[$DSlot[$d]][2], '')
 					If Not StringInStr($Error, $DArray[$DSlot[$d]][8]) Then
 						IniWrite($g_BWSIni, 'Faults', $DArray[$DSlot[$d]][2], $Error & $DArray[$DSlot[$d]][8])
 						;FileWrite($g_LogFile, '!0 Need archive for '&$DArray[$DSlot[$d]][2]&' '&$DArray[$DSlot[$d]][8]&@CRLF)
@@ -335,7 +335,7 @@ Func Au3Net($p_Num = 0)
 				If $DSlot[$d] = '-' Or $DArray[$DSlot[$d]][7] = 'PAUSE' Then ContinueLoop ; do nothing if unused or paused
 				If TimerDiff($DArray[$DSlot[$d]][10]) > 20000 Then ; 20 seconds have passed since last test
 					$DArray[$DSlot[$d]][10] = TimerInit() ; reset timer
-					$localSize = FileGetSize($g_DownDir & '\' & $g_Down[$d][0])
+					Local $localSize = FileGetSize($g_DownDir & '\' & $g_Down[$d][0])
 					If $DArray[$DSlot[$d]][11] = $localSize Then
 						GUICtrlSetColor($g_UI_Interact[5][$d + 1], 0xff0000) ; paint the progressbar in a red color
 						GUICtrlSetColor($g_UI_Static[5][$d + 2], 0xff0000)
@@ -365,8 +365,8 @@ Func Au3NetFix($p_Num = 0)
 	_Process_SwitchEdit(0, 0)
 	If FileExists($g_GameDir & '\WeiDU') And Not StringInStr(FileGetAttrib($g_GameDir & '\WeiDU'), 'D') Then FileDelete($g_GameDir & '\WeiDU') ; remove WeiDU for mac/linux (if it exists)
 	If FileExists($g_DownDir & '\WeiDU.exe') Then FileCopy($g_DownDir & '\WeiDU.exe', $g_GameDir & '\WeiDU\WeiDU.exe', 9) ; file will be overwritten if it's a beta, since that had to be extracted later
-	$ExtractOnlyMods = IniRead($g_GConfDir & '\Game.ini', 'Options', 'ExtractOnly', 'BWFixpack,BWTextpack,BWInstallpack,WeiDU,BeregostCF')
-	$DownloadOnlyMods = IniRead($g_GConfDir & '\Game.ini', 'Options', 'DownloadOnly', 'BG1TP,BWPDF')
+	Local $ExtractOnlyMods = IniRead($g_GConfDir & '\Game.ini', 'Options', 'ExtractOnly', 'BWFixpack,BWTextpack,BWInstallpack,WeiDU,BeregostCF')
+	Local $DownloadOnlyMods = IniRead($g_GConfDir & '\Game.ini', 'Options', 'DownloadOnly', 'BG1TP,BWPDF')
 	For $c = 1 To $g_CurrentPackages[0][0]
 		If StringRegExp($ExtractOnlyMods, '(?i)(\A|\x2c)' & $g_CurrentPackages[$c][0] & '(\z|\x2c)') Then ; avoid file movements from Au3Extract (subdir-logic will move if no tp2 is found)
 			_Install_CreateTP2Entry($g_CurrentPackages[$c][0], IniRead($g_MODIni, $g_CurrentPackages[$c][0], 'Name', $g_CurrentPackages[$c][0]), 0)
@@ -400,16 +400,16 @@ Func Au3NetTest($p_Num = 0)
 ; Add faults for missing files that have a download-link (Down= in mod.ini is not 'Manual')
 ; ---------------------------------------------------------------------------------------------
 	For $c = 1 To $g_CurrentPackages[0][0]
-		$ReadSection = IniReadSection($g_MODIni, $g_CurrentPackages[$c][0])
+		Local $ReadSection = IniReadSection($g_MODIni, $g_CurrentPackages[$c][0])
 		$Prefix[3] = _GetTra($ReadSection, 'T') & '-Add' ; adjust the language-addon
 		For $p = 1 To $Prefix[0]
-			$File = _IniRead($ReadSection, $Prefix[$p] & 'Down', 'Manual')
+			Local $File = _IniRead($ReadSection, $Prefix[$p] & 'Down', 'Manual')
 			If $File = 'Manual' Then ContinueLoop
-			$ExpectedSize = _IniRead($ReadSection, $Prefix[$p] & 'Size', -1)
+			Local $ExpectedSize = _IniRead($ReadSection, $Prefix[$p] & 'Size', -1)
 			If $ExpectedSize = 0 Then ContinueLoop ; if Size=0 then we always download, so not a fault
-			$localSize = FileGetSize($g_DownDir & '\' & $File)
+			Local $localSize = FileGetSize($g_DownDir & '\' & $File)
 			If $ExpectedSize <> $localSize Then
-				$Error = IniRead($g_BWSIni, 'Faults', $g_CurrentPackages[$c][0], '')
+				Local $Error = IniRead($g_BWSIni, 'Faults', $g_CurrentPackages[$c][0], '')
 				If Not StringInStr($Error, $p) Then
 					IniWrite($g_BWSIni, 'Faults', $g_CurrentPackages[$c][0], $Error & $p) ; save the error
 					;FileWrite($g_LogFile, 'Need archive for '&$g_CurrentPackages[$c][0]&' '& $Error & $p &@CRLF)
@@ -727,21 +727,21 @@ EndFunc   ;==>_Net_LinkList
 ; ---------------------------------------------------------------------------------------------
 Func _Net_LinkListUpdate($p_List)
 	Local $Prefix[4] = [3, '', 'Add', $g_ATrans[$g_ATNum] & '-Add'], $TestedBefore = 0, $Fault
-	$Format = GUICtrlRead($g_UI_Interact[6][5])
+	Local $Format = GUICtrlRead($g_UI_Interact[6][5])
 	GUICtrlSetData($g_UI_Interact[6][2], '')
-	$Handle = FileOpen($g_LogFile, 2)
+	Local $Handle = FileOpen($g_LogFile, 2)
 	For $l = 1 To $p_List[0][0] ; loop through the list
 		If $g_Flags[0] = 0 Or $g_Flags[11] = 1 Or $g_Flags[12] = 1 Then ExitLoop
 		If $p_List[$l][0] = $p_List[$l - 1][0] Then ContinueLoop ; don't show links twice
-		$ReadSection = IniReadSection($g_ModIni, $p_List[$l][0])
-		$Mod = _IniRead($ReadSection, 'Name', $p_List[$l][0])
+		Local $ReadSection = IniReadSection($g_ModIni, $p_List[$l][0])
+		Local $Mod = _IniRead($ReadSection, 'Name', $p_List[$l][0])
 		$Prefix[3] = _GetTra($ReadSection, 'T') & '-Add' ; adjust the language-addon
 		For $p = 1 To 3
-			$Down = _IniRead($ReadSection, $Prefix[$p] & 'Down', '')
-			$Save = _IniRead($ReadSection, $Prefix[$p] & 'Save', '')
+			Local $Down = _IniRead($ReadSection, $Prefix[$p] & 'Down', '')
+			Local $Save = _IniRead($ReadSection, $Prefix[$p] & 'Save', '')
 			If $Down = '' Then ContinueLoop ; if no additonal stuff is found, skip forward
 			If $Down <> 'MANUAL' Then
-				$Output = StringReplace(StringReplace(StringReplace($Format, '%URL%', $Down), '%MOD%', $Mod), '|', @CRLF)
+				Local $Output = StringReplace(StringReplace(StringReplace($Format, '%URL%', $Down), '%MOD%', $Mod), '|', @CRLF)
 				_Process_SetScrollLog($Output, 0)
 				FileWrite($Handle, $Output & @CRLF)
 			EndIf
@@ -809,7 +809,7 @@ Func _Net_LinkGetInfo($p_URL, $p_Debug = 0)
 			$Return[0] = 0
 			Return $Return
 		EndIf
-    EndIf
+	EndIf
 	If Not StringRegExp($Return[1], '(?i)(pdf|exe|rar|zip|7z|ace)\z') Then
 		$Return[0] = 0
 		Return $Return ; this was some garbage
@@ -824,7 +824,7 @@ EndFunc   ;==>_Net_LinkGetInfo
 Func _Net_LinkUpdateInfo($p_URL, $p_File, $p_Setup, $p_Prefix)
 	Local $Extended
 	FileWrite($g_LogFile, $p_Setup & '[' & $p_Prefix & '] ')
-	$Return = _Net_LinkGetInfo($p_URL)
+	Local $Return = _Net_LinkGetInfo($p_URL)
 	If $Return[0] = 0 Then
 		FileWrite($g_LogFile, '= NA' & @CRLF)
 		Return SetError(1, 0, $Return)
@@ -886,12 +886,12 @@ Func _Net_ListMissing()
 	EndIf
 	_Process_SetScrollLog(_GetTR($Message, 'L1') & '|') ; => could not load following mods
 	For $f = 1 To $Fault[0][0]
-		$ReadSection = IniReadSection($g_MODIni, $Fault[$f][0])
+		Local $ReadSection = IniReadSection($g_MODIni, $Fault[$f][0])
 		$Prefix[3] = _GetTra($ReadSection, 'T') & '-Add' ; adjust the language-addon
 		For $l = 1 To StringLen($Fault[$f][1])
-			$Type = StringMid($Fault[$f][1], $l, 1)
+			Local $Type = StringMid($Fault[$f][1], $l, 1)
 			If $Type = '1' Then
-				$Hint = _GetTR($Message, 'L2') ; => main
+				Local $Hint = _GetTR($Message, 'L2') ; => main
 			ElseIf $Type = '2' Then
 				$Hint = _GetTR($Message, 'L3') ; => additional
 			Else
@@ -899,7 +899,7 @@ Func _Net_ListMissing()
 			EndIf
 			If StringRegExp($g_fLock, '(?i)(\A|\x2c)' & $Fault[$f][0] & '(\z|\x2c)') Then ; if mod is fixed, mark as missing essential
 				$FNum = 1
-				$Mark = '*  '
+				Local $Mark = '*  '
 			ElseIf StringRegExp(_IniRead($ReadSection, $Prefix[$Type] & 'Down', ''), 'mediafire.com|clandlan.net|zippyshare.com|sentrizeal.com') Then ; these servers need some manual interaction
 				$Host = 1
 				$Mark = '** '
@@ -932,7 +932,7 @@ Func _Net_LoginFastShare($p_URL)
 	_PrintDebug('+' & @ScriptLineNumber & ' Calling _Net_LoginFastShare')
 	$p_URL = StringReplace($p_URL, 'download', 'files')
 	$p_URL = StringSplit($p_URL, '/')
-	$Handle = __HTTPConnect("fastshare.org")
+	Local $Handle = __HTTPConnect("fastshare.org")
 	__HTTPGet("fastshare.org", "/dlgo/" & $p_URL[$p_URL[0]] & "?submit=Download&accept=yes", $Handle)
 	__HTTPClose($Handle)
 EndFunc   ;==>_Net_LoginFastShare
@@ -944,7 +944,7 @@ Func _Net_LinkTest($p_Num = 0)
 	_PrintDebug('+' & @ScriptLineNumber & ' Calling _Net_LinkTest')
 	Local $Message = IniReadSection($g_TRAIni, 'NT-LinkTest')
 	Local $Prefix[4] = [3, '', 'Add', $g_ATrans[$g_ATNum] & '-Add'], $TestedBefore = 0, $Fault
-	$NeedInteract = StringTrimLeft(IniRead($g_TRAIni, 'Net-ListMissing', 'L6', ''), 3)
+	Local $NeedInteract = StringTrimLeft(IniRead($g_TRAIni, 'Net-ListMissing', 'L6', ''), 3)
 	$g_Flags[0] = 1
 	_Process_Gui_Create(1, 0)
 	Local $List = _Tree_GetCurrentList()
@@ -990,7 +990,7 @@ Func _Net_LinkTest($p_Num = 0)
 				;Else
 				If $NetInfo[2] < 0 Then $NetInfo[2] = 0 - $NetInfo[2]
 				If $Extended Then _Process_SetScrollLog(StringFormat(_GetTR($Message, 'L10'), $Save & ' / ' & $ExpectedSize & ' > ' & $NetInfo[1] & ' / ' & $NetInfo[2])) ; => hint that this is a new version
-				$Size = Round($NetInfo[2] / 1048576, 2)
+				Local $Size = Round($NetInfo[2] / 1048576, 2)
 				If $Size = '0' Then $Size = '0,01'
 				_Process_SetScrollLog(StringFormat(_GetTR($Message, 'L4'), $Size)) ; => archive found
 				;EndIf
@@ -1033,12 +1033,12 @@ Func _Net_RemoveFixedFaults()
 	Local $Fault = IniReadSection($g_BWSIni, 'Faults')
 	If @error Then Return
 	For $f = 1 To $Fault[0][0]
-		$ReadSection = IniReadSection($g_MODIni, $Fault[$f][0])
+		Local $ReadSection = IniReadSection($g_MODIni, $Fault[$f][0])
 		$Prefix[3] = _GetTra($ReadSection, 'T') & '-Add' ; adjust the language-addon
 		For $p = 1 To $Prefix[0]
 			If Not StringInStr($Fault[$f][1], $p) Then ContinueLoop
-			$Save = _IniRead($ReadSection, $Prefix[$p] & 'Save', '')
-			$Size = _IniRead($ReadSection, $Prefix[$p] & 'Size', '')
+			Local $Save = _IniRead($ReadSection, $Prefix[$p] & 'Save', '')
+			Local $Size = _IniRead($ReadSection, $Prefix[$p] & 'Size', '')
 			If FileExists($g_DownDir & '\' & $Save) And FileGetSize($g_DownDir & '\' & $Save) = $Size Then
 				$Fault[$f][1] = StringRegExpReplace($Fault[$f][1], '(?i)' & $p, '')
 			EndIf
@@ -1060,7 +1060,7 @@ Func _Net_Update_Progress()
 	For $d = 1 To 5
 		If $g_Down[$d][0] <> '' Then
 			If $DoUpdate Then FileRead($g_DownDir & '\' & $g_Down[$d][0], 1) ; files are not updated on windows 7. Use this as a workaround.
-			$localSize = FileGetSize($g_DownDir & '\' & $g_Down[$d][0])
+			Local $localSize = FileGetSize($g_DownDir & '\' & $g_Down[$d][0])
 			GUICtrlSetData($g_UI_Interact[5][$d + 1], $localSize * 100 / $g_Down[$d][1])
 		EndIf
 	Next
@@ -1078,10 +1078,10 @@ Func _Net_WGetShow($p_PID, $p_Num)
 	GUICtrlSetState($g_UI_Interact[6][2], $GUI_SHOW) ; show scroll-screen
 	GUICtrlSetState($g_UI_Interact[6][3], $GUI_HIDE)
 	$g_STDStream = $p_PID ; use PID, peak from it for initial stdout, scroll to bottom
-	$Text = StdoutRead($p_PID, True)
-	$OldNum = StringLen($Text)
+	Local $Text = StdoutRead($p_PID, True)
+	Local $OldNum = StringLen($Text)
 	$Text = StringRegExpReplace(_StringVerifyExtAscII($Text), '\r\n|\x7c|\r\|\n', @CRLF)
-	$Line = @extended
+	Local $Line = @extended
 	_GUICtrlEdit_AppendText($g_UI_Interact[6][2], $Text)
 	_GUICtrlEdit_LineScroll($g_UI_Interact[6][2], 0, 1 + $Line)
 	If BitAND($State[4], $GUI_SHOW) Then _Process_SetSize(2) ; hide help
@@ -1090,9 +1090,9 @@ Func _Net_WGetShow($p_PID, $p_Num)
 	GUICtrlSetState($g_UI_Seperate[6][0], $GUI_SHOW)
 	While 1
 		$Text = StdoutRead($p_PID, True) ; peek for new output and append new text
-		$Num = StringLen($Text)
+		Local $Num = StringLen($Text)
 		If $Num <> $OldNum Then
-			$NewText = StringRegExpReplace(_StringVerifyExtAscII(StringMid($Text, $OldNum + 1)), '\r\n|\x7c|\r\|\n', @CRLF)
+			Local $NewText = StringRegExpReplace(_StringVerifyExtAscII(StringMid($Text, $OldNum + 1)), '\r\n|\x7c|\r\|\n', @CRLF)
 			$Line = @extended
 			_GUICtrlEdit_AppendText($g_UI_Interact[6][2], $NewText)
 			_GUICtrlEdit_LineScroll($g_UI_Interact[6][2], 0, 1 + $Line)
@@ -1109,9 +1109,9 @@ Func _Net_WGetShow($p_PID, $p_Num)
 			GUICtrlSetState($g_UI_Seperate[5][0], $GUI_SHOW)
 			ExitLoop
 		EndIf
-		$DoUpdate = StringRegExp(@OSVersion, 'WIN_VISTA|WIN_7|WIN_2008|WIN_2008R2')
+		Local $DoUpdate = StringRegExp(@OSVersion, 'WIN_VISTA|WIN_7|WIN_2008|WIN_2008R2')
 		If $DoUpdate Then FileRead($g_DownDir & '\' & $g_Down[$p_Num][0], 1) ; files are not updated on windows 7. Use this as a workaround.
-		$localSize = FileGetSize($g_DownDir & '\' & $g_Down[$p_Num][0])
+		Local $localSize = FileGetSize($g_DownDir & '\' & $g_Down[$p_Num][0])
 		GUICtrlSetData($g_UI_Interact[6][1], $localSize * 100 / $g_Down[$p_Num][1])
 		Sleep(75)
 	WEnd
@@ -1126,8 +1126,8 @@ EndFunc   ;==>_Net_WGetShow
 Func _Net_WGetSize($p_URL)
 	Local $Name = '', $Return[4] = [-1, '', 0, 0], $param
 	If StringLeft($p_URL, 6) <> 'ftp://' Then $param = '--no-check-certificate --server-response'
-	$PID = Run('"' & $g_ProgDir & '\Tools\wget.exe" --no-passive-ftp --connect-timeout=20 --tries=1 ' & $param & ' --spider "' & $p_URL & '"', $g_ProgDir & '\Tools', @SW_HIDE, 8)
-	$Success = ProcessWaitClose($PID, 20) ; wait for 20 seconds -- some servers are slow, e.g. eros.gram.pl
+	Local $PID = Run('"' & $g_ProgDir & '\Tools\wget.exe" --no-passive-ftp --connect-timeout=20 --tries=1 ' & $param & ' --spider "' & $p_URL & '"', $g_ProgDir & '\Tools', @SW_HIDE, 8)
+	Local $Success = ProcessWaitClose($PID, 20) ; wait for 20 seconds -- some servers are slow, e.g. eros.gram.pl
 	If $Success = 0 Then ; timeout was reached
 		ProcessClose($PID) ; close wget (possible hangup)
 		$Return[2] = InetGetSize($p_URL)
@@ -1135,7 +1135,7 @@ Func _Net_WGetSize($p_URL)
 		If StringLeft($p_URL, 3) = 'ftp' Then $Return[3] = 1
 		Return $Return
 	EndIf
-	$Allines = StdoutRead($PID)
+	Local $Allines = StdoutRead($PID)
 	$Allines &= StderrRead($PID)
 	;ConsoleWrite($Allines & @CRLF&@CRLF); remove for debugging
 	If StringInStr($Allines, 'unable to resolve') Then Return $Return ; unable to get IP
@@ -1143,7 +1143,7 @@ Func _Net_WGetSize($p_URL)
 	If StringLeft($p_URL, 3) = 'ftp' Then ; handle ftp-requests
 		$Return[3] = 1
 		If StringRegExp(StringStripCR($Allines), '==> SIZE.*done\x2e\n|No such directory') Then Return $Return ; file is not in folder/folder does not exist
-		$Size = StringRegExp(StringStripCR($Allines), '\n==> SIZE.*\n', 3)
+		Local $Size = StringRegExp(StringStripCR($Allines), '\n==> SIZE.*\n', 3)
 		If IsArray($Size) Then
 			$Return[2] = StringRegExpReplace(StringReplace($Size[0], @LF, ''), '\A.*\s', '')
 			$Return[1] = StringRegExpReplace($p_URL, '\A.*\x2f', '')
@@ -1154,7 +1154,7 @@ Func _Net_WGetSize($p_URL)
 		$Return[0] = 0 ; set "file-exists-guess" (used if size is not specified) to unsure
 		If StringInStr($Allines, 'Content-disposition:') Then
 			$Return[0] = 1
-			$Tmp = StringRegExp($Allines, "(?i)Content-disposition: (.*?)" & @CRLF, 3)
+			Local $Tmp = StringRegExp($Allines, "(?i)Content-disposition: (.*?)" & @CRLF, 3)
 			If StringInStr($Tmp[0], '=') Then ; skip false/empty declarations
 				$Tmp = StringRegExpReplace($Tmp[0], "\A[^=]*=|\x22", '')
 				$Return[1] = StringRegExpReplace($Tmp, "\AUTF-8''", '') ; remove UTF-8-coding of filenames on foreign servers
@@ -1190,18 +1190,18 @@ Func _Net_SingleLinkUpdate($p_Setup, $p_Update = 0)
 	Local $Result = '', $UpdateIni = $g_ProgDir & '\Update\Mod.ini'
 	;	If Not StringRegExp($g_Flags[14], 'BWP|BWS') Then Return; currently no updates for other games than BWP
 	Return ; new string
-	$OldTime = StringTrimRight(FileGetTime($UpdateIni, 1, 1), 4)
-	$NewTime = @YEAR & @MON & @MDAY & @HOUR
+	Local $OldTime = StringTrimRight(FileGetTime($UpdateIni, 1, 1), 4)
+	Local $NewTime = @YEAR & @MON & @MDAY & @HOUR
 	If $NewTime <> $OldTime Or StringInStr($p_Update, 1) Then
 		_Net_Update_Link(0)
 		FileSetTime($UpdateIni, @YEAR & @MON & @MDAY & @HOUR & @MIN & @SEC, 1) ; save time so file won't get fetched within current hour
 	EndIf
 	If Not FileExists($UpdateIni) Then Return SetError(1, 0, '')
-	$ReadSection = IniReadSection($g_MODIni, $p_Setup)
-	$New = IniReadSection($UpdateIni, $p_Setup)
+	Local $ReadSection = IniReadSection($g_MODIni, $p_Setup)
+	Local $New = IniReadSection($UpdateIni, $p_Setup)
 	If @error Then Return '' ; this setup has no infos -> return
 	For $n = 1 To $New[0][0]
-		$OldValue = _IniRead($ReadSection, $New[$n][0], 'Manual') ; get the old entry
+		Local $OldValue = _IniRead($ReadSection, $New[$n][0], 'Manual') ; get the old entry
 		If $New[$n][1] <> $OldValue Then
 			IniWrite($g_MODIni, $p_Setup, $New[$n][0], $New[$n][1]) ; write if they differ
 			$Result &= ',' & $New[$n][0]
@@ -1221,7 +1221,7 @@ Func _Net_StartupUpdate()
 		GUICtrlSetState($g_UI_Button[3][6], $GUI_DISABLE)
 		Return
 	EndIf
-	$Answer = _Misc_MsgGUI(2, _GetTR($Message, 'L1'), _GetTR($Message, 'L2'), 2, _GetTR($g_UI_Message, '0-B1'), _GetTR($g_UI_Message, '0-B2')) ; => look for configuration-updates now?
+	Local $Answer = _Misc_MsgGUI(2, _GetTR($Message, 'L1'), _GetTR($Message, 'L2'), 2, _GetTR($g_UI_Message, '0-B1'), _GetTR($g_UI_Message, '0-B2')) ; => look for configuration-updates now?
 	If $Answer = 1 Then Return
 	_Process_SetSize(0)
 	_Process_Gui_Create(1, 0)
@@ -1230,14 +1230,14 @@ Func _Net_StartupUpdate()
 	GUICtrlSendMsg($g_UI_Interact[6][1], $PBM_SETMARQUEE, True, 50) ; final parameter is update time in ms
 	_Process_SetScrollLog(_GetTR($Message, 'L3'), '', -1) ; => wait for inet
 	While 1
-		$Ping = Ping('194.25.0.60', 1000) ; test if computer is online -- ip is a tcom-dns-server
+		Local $Ping = Ping('194.25.0.60', 1000) ; test if computer is online -- ip is a tcom-dns-server
 		If $Ping <> 0 Then ExitLoop
 		If $g_Flags[13] = 1 Then Exit
 	WEnd
 	GUICtrlSendMsg($g_UI_Interact[6][1], $PBM_SETMARQUEE, False, 50)
 	GUICtrlSetStyle($g_UI_Interact[6][1], $PBS_SMOOTH)
 	_Process_SetScrollLog(_GetTR($Message, 'L4'), '', -1) ; => check link updates
-	$Success = _Net_Update_Link(2)
+	Local $Success = _Net_Update_Link(2)
 	If $Success = 0 Then
 		_Process_SetScrollLog(_GetTR($Message, 'L5'), '', -1) ; => check link updates
 		_Process_Gui_Exit(1) ; exit on failure
@@ -1257,9 +1257,9 @@ Func _Net_Update_Link($p_Show = 0) ; Show GUI
 	Local $Message = IniReadSection($g_TRAIni, 'Nt-LinkUpdate')
 	Local $Extract, $Fetch, $n, $Entry
 	If StringInStr($p_Show, 1) Then GUICtrlSetData($g_UI_Interact[6][4], _GetSTR($Message, 'H1')) ; => help text
-	$UpdateIni = $g_ProgDir & '\Update\Mod.ini'
-	$UpdateURL = IniRead($g_MODIni, 'BWS-URLUpdate', 'Down', 'http://baldurs-gate.eu/bws/mod.ini.gz')
-	$UpdateArchive = IniRead($g_MODIni, 'BWS-URLUpdate', 'Save', 'mod.ini.gz')
+	Local $UpdateIni = $g_ProgDir & '\Update\Mod.ini'
+	Local $UpdateURL = IniRead($g_MODIni, 'BWS-URLUpdate', 'Down', 'http://baldurs-gate.eu/bws/mod.ini.gz')
+	Local $UpdateArchive = IniRead($g_MODIni, 'BWS-URLUpdate', 'Save', 'mod.ini.gz')
 ; ---------------------------------------------------------------------------------------------
 ; 1. Step: Show the console and test connectivity
 ; ---------------------------------------------------------------------------------------------
@@ -1336,10 +1336,10 @@ Func _Net_Update_Link($p_Show = 0) ; Show GUI
 		If $p_Show Then GUICtrlSetData($g_UI_Static[6][2], _GetTR($Message, 'L4')) ; => process
 		If $p_Show Then GUICtrlSetState($g_UI_Button[0][3], $GUI_DISABLE) ; Don't screw things up
 		If $Extract = 1 Then FileCopy($g_MODIni, $g_MODIni & '-' & @MON & '.' & @MDAY & '-' & @HOUR & '.' & @MIN & '.' & @SEC & '.bak') ; create a backup
-		$SectionNames = IniReadSectionNames($UpdateIni)
+		Local $SectionNames = IniReadSectionNames($UpdateIni)
 		For $s = 1 To $g_Setups[0][0]
 			If _MathCheckDiv($s, 10) = 2 Then GUICtrlSetData($g_UI_Interact[6][1], 40 + ($s * 60 / $g_Setups[0][0]))
-			$Success = 0
+			Local $Success = 0
 			For $n = 1 To $SectionNames[0]
 				If $g_Setups[$s][0] = $SectionNames[$n] Then
 					$Success = 1
@@ -1347,9 +1347,9 @@ Func _Net_Update_Link($p_Show = 0) ; Show GUI
 				EndIf
 			Next
 			If $Success = 0 Then ContinueLoop ; don't update if the chapter is not mentioned
-			$h = 0 ; "mod is changed-line" is shown
-			$NewSection = IniReadSection($UpdateIni, $g_Setups[$s][0]) ; has to exist we searched for sections from the update-file
-			$OldSection = IniReadSection($g_MODIni, $g_Setups[$s][0])
+			Local $h = 0 ; "mod is changed-line" is shown
+			Local $NewSection = IniReadSection($UpdateIni, $g_Setups[$s][0]) ; has to exist we searched for sections from the update-file
+			Local $OldSection = IniReadSection($g_MODIni, $g_Setups[$s][0])
 			If Not IsArray($OldSection) Then ; create dummy entry for new additions
 				Local $OldSection[1][2]
 				$OldSection[0][0] = 0
@@ -1361,7 +1361,7 @@ Func _Net_Update_Link($p_Show = 0) ; Show GUI
 				Else
 					$NewValue = $NewSection[$n][1]
 				EndIf
-				$OldValue = _IniRead($OldSection, $NewSection[$n][0], '') ; get the old entry
+				Local $OldValue = _IniRead($OldSection, $NewSection[$n][0], '') ; get the old entry
 				If $NewValue == $OldValue Then ; exactly the same (case sensitive)
 				Else ; there is a change
 					If $h = 0 Then ; make a note

@@ -5,10 +5,10 @@
 ; ---------------------------------------------------------------------------------------------
 Func _Admin_ContextMenu($p_Lang, $p_Message)
 	Local $MenuItem[6] = [5, 'a', 'b', 'c', 'd', 'e'], $Return
-	$ID = GUICtrlRead($g_UI_Interact[11][4])
-	$Text = StringSplit(GUICtrlRead($ID), '|')
+	Local $ID = GUICtrlRead($g_UI_Interact[11][4])
+	Local $Text = StringSplit(GUICtrlRead($ID), '|')
 	If $Text[0] = 1 Then $ID = GUICtrlCreateDummy()
-	$MenuLabel = $Text[1]
+	Local $MenuLabel = $Text[1]
 	$Text[1] = _Admin_ItemTranslate($Text[1], $p_Lang, 2) ; Link, Down, Save, Size, Test, NotFixed, REN, Wiki
 	GUISetState(@SW_DISABLE) ; disable the GUI itself while selection is pending to avoid unwanted treeview-changes
 	$g_UI_Menu[0][4] = GUICtrlCreateContextMenu($ID) ; create a context-menu on the clicked item
@@ -30,7 +30,7 @@ Func _Admin_ContextMenu($p_Lang, $p_Message)
 ; Create another Msg-loop, since the GUI is disabled and only the menuitems should be available
 ; ---------------------------------------------------------------------------------------------
 	While 1
-		$Msg = GUIGetMsg()
+		Local $Msg = GUIGetMsg()
 		Switch $Msg
 			Case $MenuItem[1] ; new/edit entry
 				$Return = 1
@@ -80,11 +80,11 @@ EndFunc   ;==>_Admin_ContextMenu
 ; ---------------------------------------------------------------------------------------------
 Func _Admin_ItemDelete()
 	If $g_Flags[16] = 0 Then
-		$Act = ControlGetHandle($g_UI[0], '', ControlGetFocus($g_UI[0]))
+		Local $Act = ControlGetHandle($g_UI[0], '', ControlGetFocus($g_UI[0]))
 		If _WinAPI_GetClassName($Act) = 'Edit' Then ControlSend($g_UI[0], '', $Act, '{BACKSPACE}') ; mark text if markable
 		Return ; LV is not focused
 	EndIf
-	$List = StringSplit(ControlListView($g_UI[0], '', $g_UI_Interact[11][4], 'GetSelected', 1), '|')
+	Local $List = StringSplit(ControlListView($g_UI[0], '', $g_UI_Interact[11][4], 'GetSelected', 1), '|')
 	For $l = $List[0] To 1 Step -1
 		GUICtrlDelete(_GUICtrlListView_GetItemParam($g_UI_Interact[11][4], $List[$l]))
 	Next
@@ -95,7 +95,7 @@ EndFunc   ;==>_Admin_ItemDelete
 ; ---------------------------------------------------------------------------------------------
 Func _Admin_ItemEdit($p_New = 0)
 	Local $Width[4] = [3, 170, 470, 30]
-	$Current = GUICtrlRead($g_UI_Seperate[0][0]) + 1
+	Local $Current = GUICtrlRead($g_UI_Seperate[0][0]) + 1
 	If $Current = 11 Then
 		$LV = $g_UI_Interact[11][4]
 		$Key = $g_UI_Interact[11][5]
@@ -111,14 +111,14 @@ Func _Admin_ItemEdit($p_New = 0)
 		If $State Then
 			Local $Offset[5] = [4, 30, 90, 230, 705]
 		Else
-			$Pos = ControlGetPos($g_UI[0], '', $g_UI_Interact[12][2]) ; position of the LV
+			Local $Pos = ControlGetPos($g_UI[0], '', $g_UI_Interact[12][2]) ; position of the LV
 			Local $Offset[5] = [4, $Pos[0], 90, $Pos[0] + 45, $Pos[0] + $Pos[2] - 30]
 			Local $Width[4] = [3, 40, 255, 30] ; 400, 445, 705
 		EndIf
 	EndIf
-	$Index = Number(ControlListView($g_UI[0], '', $LV, 'GetSelected'))
-	$ID = GUICtrlRead($LV)
-	$Text = StringSplit(GUICtrlRead($ID), '|')
+	Local $Index = Number(ControlListView($g_UI[0], '', $LV, 'GetSelected'))
+	Local $ID = GUICtrlRead($LV)
+	Local $Text = StringSplit(GUICtrlRead($ID), '|')
 	If $p_New = 1 Then
 		Local $iPos[2] = [1, 40], $Text[3]
 	Else
@@ -142,7 +142,7 @@ Func _Admin_ItemEdit($p_New = 0)
 	GUICtrlSetState($LV, $GUI_HIDE)
 	GUIGetMsg() ; Get last message (in case enter was pressed, this would be the current default (e.g. $g_UI_Button[0][2])
 	While 1
-		$Msg = GUIGetMsg()
+		Local $Msg = GUIGetMsg()
 		Switch $Msg
 			Case $Save
 				Local $Error = 0
@@ -159,7 +159,7 @@ Func _Admin_ItemEdit($p_New = 0)
 					_Tra_ItemWriteEntry()
 				Else
 					If $p_New = 1 Then ; new
-						$Test = GUICtrlCreateListViewItem($Text[1] & '|' & $Text[2], $LV)
+						Local $Test = GUICtrlCreateListViewItem($Text[1] & '|' & $Text[2], $LV)
 					Else
 						GUICtrlSetData($ID, $Text[1] & '|' & $Text[2])
 					EndIf
@@ -185,12 +185,12 @@ EndFunc   ;==>_Admin_ItemEdit
 ; Get current LVitems
 ; ---------------------------------------------------------------------------------------------
 Func _Admin_ItemGet($p_Lang, $p_Selected = '*')
-	$Num = ControlListView($g_UI[0], '', $g_UI_Interact[11][4], 'GetItemCount')
+	Local $Num = ControlListView($g_UI[0], '', $g_UI_Interact[11][4], 'GetItemCount')
 	Local $Return[$Num + 5][2], $Token[4][2] = [[3], [1, 'Name'], [2, 'Rev'], [8, 'Tra']] ; 5 above = 3 tokens + type + 0-index in array
 	$Return[0][0] = $Num + 4
 	For $n = 1 To $Num
-		$ID = _GUICtrlListView_GetItemParam($g_UI_Interact[11][4], $n - 1)
-		$Text = StringSplit(GUICtrlRead($ID), '|')
+		Local $ID = _GUICtrlListView_GetItemParam($g_UI_Interact[11][4], $n - 1)
+		Local $Text = StringSplit(GUICtrlRead($ID), '|')
 		$Return[$n][0] = _Admin_ItemTranslate($Text[1], $p_Lang, 2)
 		$Return[$n][1] = $Text[2]
 	Next
@@ -215,7 +215,7 @@ EndFunc   ;==>_Admin_ItemGet
 ; Open url or file via ShellExecute
 ; ---------------------------------------------------------------------------------------------
 Func _Admin_ItemOpen($p_ID, $p_Lang)
-	$String = StringSplit(GUICtrlRead($p_ID), '|')
+	Local $String = StringSplit(GUICtrlRead($p_ID), '|')
 	$String[1] = _Admin_ItemTranslate($String[1], $p_Lang, 2) ; Link, Down, Save, Size, Test, NotFixed, REN, Wiki
 	If StringRegExp($String[1], '(?i)Link|Down') Then ; open in webbrowser
 		ShellExecute($String[2])
@@ -234,8 +234,8 @@ EndFunc   ;==>_Admin_ItemOpen
 Func _Admin_ItemSet($p_List, $p_Selected, $p_String)
 	For $l = 1 To $p_List[0][0]
 		If $p_List[$l][0] <> $p_Selected Then ContinueLoop
-		$ID = _GUICtrlListView_GetItemParam($g_UI_Interact[11][4], $l - 1)
-		$Text = StringSplit(GUICtrlRead($ID), '|')
+		Local $ID = _GUICtrlListView_GetItemParam($g_UI_Interact[11][4], $l - 1)
+		Local $Text = StringSplit(GUICtrlRead($ID), '|')
 		GUICtrlSetData($ID, $Text[1] & '|' & $p_String)
 		Return 1
 	Next
@@ -246,15 +246,15 @@ EndFunc   ;==>_Admin_ItemSet
 ; Test if the current setting is valid. Works with urls, filenames and sizes
 ; ---------------------------------------------------------------------------------------------
 Func _Admin_ItemTest($p_ID, $p_Lang, $p_Message)
-	$String = StringSplit(GUICtrlRead($p_ID), '|')
-	$Text = $String[1]
+	Local $String = StringSplit(GUICtrlRead($p_ID), '|')
+	Local $Text = $String[1]
 	$String[1] = _Admin_ItemTranslate($String[1], $p_Lang, 2) ; Link, Down, Save, Size, Test, NotFixed, REN, Wiki
-	$List = _Admin_ItemGet($p_Lang)
+	Local $List = _Admin_ItemGet($p_Lang)
 	If StringInStr($String[1], 'Down') Then ; download-test
-		$Save = _IniRead($List, StringReplace($String[1], 'Down', 'Save'), '')
-		$Size = _IniRead($List, StringReplace($String[1], 'Down', 'Size'), '')
-		$Return = $Text & '|' & $String[2] & '|' & $Save & '|' & $Size & '||'
-		$Test = _Net_LinkGetInfo($String[2], 1)
+		Local $Save = _IniRead($List, StringReplace($String[1], 'Down', 'Save'), '')
+		Local $Size = _IniRead($List, StringReplace($String[1], 'Down', 'Size'), '')
+		Local $Return = $Text & '|' & $String[2] & '|' & $Save & '|' & $Size & '||'
+		Local $Test = _Net_LinkGetInfo($String[2], 1)
 		If $Test[0] = 0 Then
 			_Misc_MsgGUI(3, _GetTR($p_Message, 'L12'), $Return & _GetTR($p_Message, 'L14')) ; => Test: file not found
 			Return
@@ -302,7 +302,7 @@ Func _Admin_ItemTest($p_ID, $p_Lang, $p_Message)
 			_Admin_ItemSet($List, $String[1], $Test)
 		EndIf
 	ElseIf StringInStr($String[1], 'Test') Then ; test-test
-		$File = StringSplit($String[2], ':')
+		Local $File = StringSplit($String[2], ':')
 		If $File[0] = 1 Then
 			_Misc_MsgGUI(3, _GetTR($p_Message, 'L12'), _GetTR($p_Message, 'L9')) ; => Test: file not found
 			Return
@@ -312,7 +312,7 @@ Func _Admin_ItemTest($p_ID, $p_Lang, $p_Message)
 			_Misc_MsgGUI(3, _GetTR($p_Message, 'L12'), $Return & _GetTR($p_Message, 'L14')) ; => Test: file not found
 			Return
 		Else
-			$Found = 1
+			Local $Found = 1
 			If $File[2] <> '-' Then
 				$Test = FileGetSize($g_GameDir & '\' & $File[1])
 				If $Test <> $File[2] Then
@@ -377,7 +377,7 @@ Func _Admin_ModDelete($p_Message, $p_Setup = '', $p_Tra = '')
 	Local $Setup, $Tra
 	If $p_Setup = '' Then
 		$Setup = GUICtrlRead($g_UI_Interact[11][7])
-		$Test = _Misc_MsgGUI(2, _GetTR($g_UI_Message, '0-T1'), StringFormat(_GetTR($p_Message, 'L11'), $Setup), 2, _GetTR($g_UI_Message, '0-B1'), _GetTR($g_UI_Message, '0-B2')) ; => Save changes? Yes/No
+		Local $Test = _Misc_MsgGUI(2, _GetTR($g_UI_Message, '0-T1'), StringFormat(_GetTR($p_Message, 'L11'), $Setup), 2, _GetTR($g_UI_Message, '0-B1'), _GetTR($g_UI_Message, '0-B2')) ; => Save changes? Yes/No
 		If $Test = 1 Then Return 0 ; user does not want to save
 	Else
 		$Setup = $p_Setup
@@ -392,7 +392,7 @@ Func _Admin_ModDelete($p_Message, $p_Setup = '', $p_Tra = '')
 		IniDelete($g_GConfDir & '\Mod-' & $g_ATrans[$a] & '.ini', 'Description', $Setup)
 	Next
 	If $Tra <> '-' Then
-		$Token = StringSplit($Tra, ',')
+		Local $Token = StringSplit($Tra, ',')
 		For $t = 1 To $Token[0]
 			IniDelete($g_GConfDir & '\WeiDU-' & StringLeft($Token[$t], 2) & '.ini', $Setup)
 		Next
@@ -409,7 +409,7 @@ EndFunc   ;==>_Admin_ModDelete
 ; ---------------------------------------------------------------------------------------------
 Func _Admin_ModDisplay($p_Num, $p_Lang, ByRef $p_Desc)
 	Local $Num = '', $Type[5] = [4, 'R', 'S', 'T', 'E']
-	$Setup = GUICtrlRead($g_UI_Interact[11][$p_Num])
+	Local $Setup = GUICtrlRead($g_UI_Interact[11][$p_Num])
 	If $Setup = '' Then Return
 	If $p_Num = 1 Then
 		$Num = _Admin_ModGetIndex($Setup, 1)
@@ -417,7 +417,7 @@ Func _Admin_ModDisplay($p_Num, $p_Lang, ByRef $p_Desc)
 		$Setup = $g_Setups[$Num][0]
 	EndIf
 	$p_Desc[0][0] = 0
-	$ReadSection = IniReadSection($g_MODIni, $Setup)
+	Local $ReadSection = IniReadSection($g_MODIni, $Setup)
 	If @error Then Return ; avoid crashes if notice is selected => select the mod
 	ReDim $ReadSection[$ReadSection[0][0] + $g_ATrans[0] + 2][2]
 	_IniWrite($ReadSection, 'Setup', $Setup)
@@ -430,7 +430,7 @@ Func _Admin_ModDisplay($p_Num, $p_Lang, ByRef $p_Desc)
 	GUICtrlSetData($g_UI_Interact[11][3], StringReplace(_IniRead($ReadSection, 'Desc-' & GUICtrlRead($g_UI_Static[11][4]), ''), '|', @CRLF)) ; ext. information
 	GUICtrlSetData($g_UI_Interact[11][7], $Setup) ; setup-file
 	GUICtrlSetData($g_UI_Interact[11][8], _IniRead($ReadSection, 'Tra', '')) ; translation
-	$Test = _IniRead($ReadSection, 'Type', '')
+	Local $Test = _IniRead($ReadSection, 'Type', '')
 	For $t = 1 To $Type[0]
 		If StringInStr($Test, $Type[$t]) Then
 			_Admin_ModType($t)
@@ -449,7 +449,7 @@ EndFunc   ;==>_Admin_ModDisplay
 ; Translate the mods name to setup and vice versa
 ; ---------------------------------------------------------------------------------------------
 Func _Admin_ModGetIndex($p_String, $p_IsName = 0)
-	$Return = ''
+	Local $Return = ''
 	For $g = 1 To $g_Setups[0][0]
 		If $p_String = $g_Setups[$g][$p_IsName] Then
 			$Return = $g

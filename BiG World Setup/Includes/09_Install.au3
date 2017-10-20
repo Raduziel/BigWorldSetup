@@ -46,7 +46,7 @@ Func Au3PrepInst($p_Num = 0)
 		#ce
 		; entries from Ini_movies.bat
 		If StringRegExp($g_Compilation, '(?i)S|T|E') Then ; enable skipping of movies for experienced players
-			$Movies = StringSplit('BISLOGO,BWDRAGON,BEREGOST,BGENTER,BGINTRO,BGSUNRIS,BGSUNSET,BHALL,CAMP,CBCTMOVE,CBSOUBAR,CNDLKEEP,' & _
+			Local $Movies = StringSplit('BISLOGO,BWDRAGON,BEREGOST,BGENTER,BGINTRO,BGSUNRIS,BGSUNSET,BHALL,CAMP,CBCTMOVE,CBSOUBAR,CNDLKEEP,' & _
 					'DAYNITE,DEATHAND,DUNGEON,DURLAG,ELDRCITY,END15FPS,ENDCRDIT,ENDMOVIE,FLYTHR01,FLYTHR02,FLYTHR03,FLYTHR04,FRARMINN,GNOLL,' & _
 					'INTRO,INTRO15F,IRONTHRN,JZINTRO,MANAFORG,MELISSAN,MINEFLOD,NASHKELL,NITEDAY,OUTRO,PALACE,POCKETZZ,RESTCAMP,RESTDUNG,' & _
 					'RESTINN,SARADUSH,SEWER,SOAINTRO,VA#MOV01,WOTC,WOTH,WRECK,WYVERN', ',')
@@ -60,7 +60,7 @@ Func Au3PrepInst($p_Num = 0)
 		IniWrite($g_IWD1Dir & '\icewind.ini', 'Game Options', 'Cheats', '1')
 	ElseIf StringInStr($g_Flags[14], 'EE') Then
 		If $g_Flags[14] = 'BG1EE' Then
-			$MyBGEE = @MyDocumentsDir & "\Baldur's Gate - Enhanced Edition"
+			Local $MyBGEE = @MyDocumentsDir & "\Baldur's Gate - Enhanced Edition"
 
 		ElseIf $g_Flags[14] = 'BG2EE' Then
 			$MyBGEE = @MyDocumentsDir & "\Baldur's Gate II - Enhanced Edition"
@@ -116,7 +116,7 @@ Func Au3RunFix($p_Num = 0)
 	Local $Message = IniReadSection($g_TRAIni, 'IN-Au3RunFix')
 	$Type = StringRegExpReplace($g_Flags[14], '(?i)BWS|BWP', 'BG2')
 	_Process_SwitchEdit(0, 0)
-	_Process_ChangeDir($g_GameDir, 1)
+	_Process_ChangeDir($g_GameDir)
 	GUICtrlSetData($g_UI_Interact[6][4], StringFormat(_GetSTR($Message, 'H1'), $Type)) ; => help text
 	GUICtrlSetData($g_UI_Static[6][1], _GetTR($Message, 'L2')) ; => watch progress
 	$g_LogFile = $g_LogDir & '\BiG World Install Debug.txt'
@@ -296,7 +296,7 @@ Func Au3Install($p_Num = 0, $p_Debug = 0)
 	Local $EET_Mods
 	If $g_Flags[21] <> '' Then $EET_Mods = $g_Flags[20 + StringRegExpReplace($g_Flags[14], '(?i)\ABG|EE\z', '')]
 	GUICtrlSetData($g_UI_Interact[6][4], StringFormat(_GetSTR($Message, 'H1'), $Type)) ; => help text
-	_Process_ChangeDir($g_GameDir, 1)
+	_Process_ChangeDir($g_GameDir)
 	FileClose(FileOpen($g_GameDir & '\BWS_Dummy.nul', 2))
 	_Process_SwitchEdit(0, 1)
 	If Not FileExists($g_GameDir & '\WeiDU\WeiDU.exe') Then
@@ -637,7 +637,7 @@ Func _Install_BG1Textpatch($p_Message)
 	$Success = _Test_CheckBG1TP() ; German textpack
 	If $Success <> 1 Then
 		GUICtrlSetData($g_UI_Static[6][2], _GetTR($p_Message, 'L4')) ; => install TP
-		_Process_ChangeDir($g_BG1Dir, 1)
+		_Process_ChangeDir($g_BG1Dir)
 		FileCopy($g_BG2Dir & '\WeiDU\WeiDU.exe', $g_BG1Dir & '\Setup-bg1tp.exe', 1)
 		If $Success = -1 Then
 			_Process_Run('Setup-BG1TP.exe --force-uninstall-list 0', 'Setup-bg1tp.exe')
@@ -655,7 +655,7 @@ Func _Install_BG1Textpatch($p_Message)
 			_Misc_MsgGUI(4, _GetTR($p_Message, 'T1'), _GetTR($p_Message, 'L1'), 1, _GetTR($p_Message, 'B1')) ; => cannot install new TP
 			Exit
 		EndIf
-		_Process_ChangeDir($g_BG2Dir, 1)
+		_Process_ChangeDir($g_BG2Dir)
 	EndIf
 ; ---------------------------------------------------------------------------------------------
 ; install the Spanish textpatch if needed
@@ -663,35 +663,35 @@ Func _Install_BG1Textpatch($p_Message)
 	If $g_MLang[1] = 'SP' And Not StringInStr(FileRead($g_BG1Dir & '\WeiDU.log'), @LF & '~setup-Abra.tp2') And $g_BG1Dir <> '-' Then ; first installation
 		GUICtrlSetData($g_UI_Static[6][2], _GetTR($p_Message, 'L4')) ; => install abra
 		_FileReplace($g_BG1Dir & '\Setup-Abra.tp2', 'AT_INTERACTIVE_EXIT ~VIEW Abra\Readme.htm~', '//AT_INTERACTIVE_EXIT ~VIEW Abra\Readme.htm~') ; don't show the readme
-		_Process_ChangeDir($g_BG1Dir, 1)
+		_Process_ChangeDir($g_BG1Dir)
 		FileCopy($g_BG2Dir & '\WeiDU\WeiDU.exe', $g_BG1Dir & '\Setup-Abra.exe', 1)
 		_Process_Run('Setup-Abra.exe --no-exit-pause --noautoupdate --language 0 --skip-at-view --force-install-list 0 1', 'Setup-Abra.exe')
 		If Not StringInStr(FileRead($g_BG1Dir & '\WeiDU.log'), @LF & '~setup-Abra.tp2') Then
 			_Misc_MsgGUI(4, _GetTR($p_Message, 'T1'), _GetTR($p_Message, 'L1'), 1, _GetTR($p_Message, 'B1')) ; => cannot install abra
 			Exit
 		EndIf
-		_Process_ChangeDir($g_BG2Dir, 1)
+		_Process_ChangeDir($g_BG2Dir)
 	EndIf
 ; ---------------------------------------------------------------------------------------------
 ; install the French textpatch if needed
 ; ---------------------------------------------------------------------------------------------
 	If $g_MLang[1] = 'FR' And Not StringInStr(FileRead($g_BG1Dir & '\WeiDU.log'), @LF & '~correcfrbg1/correcfrbg1.tp2') And $g_BG1Dir <> '-' Then ; first installation
 		GUICtrlSetData($g_UI_Static[6][2], _GetTR($p_Message, 'L4')) ; => install textpatch
-		_Process_ChangeDir($g_BG1Dir, 1)
+		_Process_ChangeDir($g_BG1Dir)
 		FileCopy($g_BG2Dir & '\WeiDU\WeiDU.exe', $g_BG1Dir & '\Setup-correcfrbg1.exe', 1)
 		_Process_Run('Setup-correcfrbg1.exe --no-exit-pause --noautoupdate --language 0 --skip-at-view --force-install-list 0 1', 'Setup-correcfrbg1.exe')
 		If Not StringInStr(FileRead($g_BG1Dir & '\WeiDU.log'), @LF & '~correcfrbg1/correcfrbg1.tp2') Then
 			_Misc_MsgGUI(4, _GetTR($p_Message, 'T1'), _GetTR($p_Message, 'L1'), 1, _GetTR($p_Message, 'B1')) ; => cannot install correcfrbg
 			Exit
 		EndIf
-		_Process_ChangeDir($g_BG2Dir, 1)
+		_Process_ChangeDir($g_BG2Dir)
 	EndIf
 ; ---------------------------------------------------------------------------------------------
 ; install the Polish BG1 characters conversion if needed
 ; ---------------------------------------------------------------------------------------------
 	If $g_MLang[1] = 'PO' And FileGetSize($g_BG1Dir & '\DialogF.tlk') = '3430385' And Not FileExists($g_BG1Dir & '\Dialog.bak') And $g_BG1Dir <> '-' Then ; first installation
 		GUICtrlSetData($g_UI_Static[6][2], _GetTR($p_Message, 'L4')) ; => install textpatch
-		_Process_ChangeDir($g_BG1Dir, 1)
+		_Process_ChangeDir($g_BG1Dir)
 		FileCopy($g_BG2Dir & '\BGT\kpzbg1.exe', $g_BG1Dir & '\kpzbg1.exe', 1)
 		$Handle = FileOpen($g_BG1Dir & '\kpzbg1.txt', 2)
 		FileWrite($Handle, 3 & @CRLF & 1 & @CRLF)
@@ -701,21 +701,21 @@ Func _Install_BG1Textpatch($p_Message)
 			_Misc_MsgGUI(4, _GetTR($p_Message, 'T1'), _GetTR($p_Message, 'L1'), 1, _GetTR($p_Message, 'B1')) ; => cannot install textpatch
 			Exit
 		EndIf
-		_Process_ChangeDir($g_BG2Dir, 1)
+		_Process_ChangeDir($g_BG2Dir)
 	EndIf
 ; ---------------------------------------------------------------------------------------------
 ; install the Russian textpatch if needed
 ; ---------------------------------------------------------------------------------------------
 	If $g_MLang[1] = 'RU' And Not StringInStr(FileRead($g_BG1Dir & '\WeiDU.log'), @LF & '~bg1textpack/setup-bg1textpack.tp2') And $g_BG1Dir <> '-' Then ; first installation
 		GUICtrlSetData($g_UI_Static[6][2], _GetTR($p_Message, 'L4')) ; => install textpatch
-		_Process_ChangeDir($g_BG1Dir, 1)
+		_Process_ChangeDir($g_BG1Dir)
 		FileCopy($g_BG1Dir & '\dialog.tlk', $g_BG1Dir & '\dialogf.tlk', 1)
 		_Process_Run('setup-bg1textpack.exe --no-exit-pause --noautoupdate --language 0 --skip-at-view --force-install-list 1', 'setup-bg1textpack.exe')
 		If Not StringInStr(FileRead($g_BG1Dir & '\WeiDU.log'), @LF & '~bg1textpack/setup-bg1textpack.tp2') Then
 			_Misc_MsgGUI(4, _GetTR($p_Message, 'T1'), _GetTR($p_Message, 'L1'), 1, _GetTR($p_Message, 'B1')) ; => cannot install bg1textpack
 			Exit
 		EndIf
-		_Process_ChangeDir($g_BG2Dir, 1)
+		_Process_ChangeDir($g_BG2Dir)
 	EndIf
 EndFunc   ;==>_Install_BG1Textpatch
 

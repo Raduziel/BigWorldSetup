@@ -60,8 +60,8 @@ Func _Selection_ContextMenu()
 			$MenuItem[3] = GUICtrlCreateMenuItem(_GetTR($g_UI_Message, '4-L12'), $g_UI_Menu[0][4]) ; => jump to next part of mod
 		EndIf
 		If StringInStr($g_CentralArray[$p_Num][2], '?') Then
-			$Pos = StringInStr($g_CentralArray[$p_Num][2], '_', 0, -1)
-			$Definition = IniRead($g_GConfDir & '\Game.ini', 'Edit', $g_CentralArray[$p_Num][0] & ';' & StringLeft($g_CentralArray[$p_Num][2], $Pos - 1), '')
+			Local $Pos = StringInStr($g_CentralArray[$p_Num][2], '_', 0, -1)
+			Local $Definition = IniRead($g_GConfDir & '\Game.ini', 'Edit', $g_CentralArray[$p_Num][0] & ';' & StringLeft($g_CentralArray[$p_Num][2], $Pos - 1), '')
 			If $Definition <> '' Then
 				GUICtrlCreateMenuItem('', $g_UI_Menu[0][4]) ; separator
 				$MenuItem[5] = GUICtrlCreateMenuItem(_GetTR($g_UI_Message, '4-L24'), $g_UI_Menu[0][4]) ; => edit value

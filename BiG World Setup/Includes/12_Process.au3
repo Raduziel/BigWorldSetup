@@ -11,9 +11,11 @@ Func _Process_ChangeDir($p_Dir, $p_Exit = 0)
 		_Process_Read($p_Answer)
 		If StringRegExp($g_ConsoleOutput, '(?i)cd /D ".*"(\r\n){1,3}[[:alpha:]]') Then ExitLoop ; wait for change to take effect
 	WEnd
-	$Test = StringRegExp($g_ConsoleOutput, '.*\z', 3)
-	If $Test[0] = StringRegExpReplace($p_Dir, '\x5c{1,}\z', '') & '>' Then Return 1
-	If $Test[0] = StringRegExpReplace(_StringVerifyAscII($p_Dir), '\x5c{1,}\z', '') & '>' Then Return 1
+	
+	Local $result = StringInStr($g_ConsoleOutput, StringRegExpReplace($p_Dir, '\x5c{1,}\z', '') & '>', $STR_CASESENSE, -1)
+	$result += StringInStr($g_ConsoleOutput, StringRegExpReplace(_StringVerifyAscII($p_Dir), '\x5c{1,}\z', '') & '>', $STR_CASESENSE, -1)
+	If $result = 0 Then $p_Exit = 1
+
 	If $p_Exit = 1 Then
 		_Process_SetConsoleLog(StringFormat(_GetTR($g_UI_Message, '6-L5'), $p_Dir)) ; => cannot change path > exit
 		_Process_Gui_Delete(6, 6, 1) ; Delete the window
@@ -78,13 +80,14 @@ EndFunc   ;==>_Process_Gui_Create
 Func _Process_Gui_Delete($p_Tab1, $p_Tab2, $p_Pause = 1) ; go back to the tab where we left before
 	If $g_Flags[13] = 1 Then Exit
 	If $p_Pause = 0 Then $g_Flags[0] = 0
-	$EventMode = AutoItSetOption('GUIOnEventMode')
+	Local $EventMode = AutoItSetOption('GUIOnEventMode')
 	If Not $EventMode Then AutoItSetOption('GUIOnEventMode', 1)
 	If $g_Flags[0] = 1 Then
 		While $g_Flags[11] = 0 And $g_Flags[12] = 0 And $g_Flags[13] = 0
 			Sleep(10)
 		WEnd
 	EndIf
+	Local $Switch
 	If $g_Flags[0] = 0 Then $g_Flags[11] = 1
 	If $g_Flags[13] = 1 Then Exit
 	If $g_Flags[11] = 1 Then $Switch = $p_Tab1

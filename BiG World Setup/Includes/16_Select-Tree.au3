@@ -686,8 +686,8 @@ Func _Tree_PurgeItem($p_Index)
 	Local $DeleteSub
 	If Not IsNumber($p_Index) Then Return
 	If $g_CentralArray[$p_Index][3] = '' Then Return ; already purged
-	$ModID = _AI_GetStart($p_Index, '-')
-	$ModState = _AI_GetModState($ModID)
+	Local $ModID = _AI_GetStart($p_Index, '-')
+	Local $ModState = _AI_GetModState($ModID)
 	$g_CentralArray[$p_Index][3] = '' ; mark as deleted by removing the items description
 	If $g_CentralArray[$p_Index][9] = 1 Then $g_CentralArray[$ModID][9] -= 1 ; decrease actual counter
 	$g_CentralArray[$p_Index][9] = 0 ; set items to deselected
@@ -695,7 +695,7 @@ Func _Tree_PurgeItem($p_Index)
 	$g_CentralArray[$p_Index][12] = '0000' ; disable items selection to prevent selection while switching versions / adding mods...
 	;GUICtrlDelete($p_Index)
 	If $g_CentralArray[$p_Index][2] = '-' Then
-		$Num = $p_Index + 1
+		Local $Num = $p_Index + 1
 		While StringRegExp($g_CentralArray[$Num][2], '-|!') = 0
 			$g_CentralArray[$Num][3] = '' ; mark as deleted by removing the items description
 			$g_CentralArray[$Num][9] = 0 ; set items to deselected
@@ -707,8 +707,8 @@ Func _Tree_PurgeItem($p_Index)
 		$g_CentralArray[$ModID][9] = 0 ; no components
 		$g_CentralArray[$ModID][10] = 0 ; no possible selection
 	ElseIf $g_CentralArray[$p_Index][10] = 1 Then ; working with subtrees
-		$Num = _AI_GetStart($p_Index, '+')
-		$n = $Num + 1
+		Local $Num = _AI_GetStart($p_Index, '+')
+		Local $n = $Num + 1
 		$DeleteSub = 1
 		While _AI_IsInSubtree($n) = 1
 			If $g_CentralArray[$n][3] <> '' Then $DeleteSub = 0
@@ -728,11 +728,11 @@ Func _Tree_PurgeItem($p_Index)
 	EndIf
 	If $g_CentralArray[$ModID][10] = 0 Then ; mod is completely purged
 		If $g_CentralArray[$ModID][13] <> '' Then
-			$Splitted = StringSplit($g_CentralArray[$ModID][13], ',')
+			Local $Splitted = StringSplit($g_CentralArray[$ModID][13], ',')
 			For $s = 1 To $Splitted[0]
-				$Replace = ''
-				$Found = StringRegExp($g_CentralArray[Number($Splitted[$s])][13], '(\A|\x2c)' & $ModID & '(\x2c|\z)', 2)
-				$Num = StringRegExp($Found[0], '\x2c', 3)
+				Local $Replace = ''
+				Local $Found = StringRegExp($g_CentralArray[Number($Splitted[$s])][13], '(\A|\x2c)' & $ModID & '(\x2c|\z)', 2)
+				Local $Num = StringRegExp($Found[0], '\x2c', 3)
 				If UBound($Num) = 2 Then $Replace = ','
 				$g_CentralArray[Number($Splitted[$s])][13] = StringReplace($g_CentralArray[Number($Splitted[$s])][13], $Found[0], $Replace)
 			Next

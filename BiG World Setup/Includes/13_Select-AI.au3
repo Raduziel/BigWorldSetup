@@ -255,7 +255,7 @@ Func _AI_SetClicked($p_Num, $p_Type = 0, $p_Key = 0) ; $a=itemnumber; $p_Type=0(
 		EndIf
 		If $ForceAll = 1 Then ; force the state on all other instances of the mod
 			If $g_CentralArray[$p_Num][13] <> '' Then
-				$Splitted = StringSplit($g_CentralArray[$p_Num][13], ',')
+				Local $Splitted = StringSplit($g_CentralArray[$p_Num][13], ',')
 				For $s = 1 To $Splitted[0]
 					If $SetState = 0 Then
 						_AI_SetMod_Disable($Splitted[$s]) ; No selection should have a name -, so all are deselected

@@ -41,8 +41,8 @@ Func Au3Extract($p_Num = 0)
 ; pause due to current decision
 ; ---------------------------------------------------------------------------------------------
 		If $g_Flags[11] = 1 Then _Process_Pause()
-		$ReadSection = IniReadSection($g_MODIni, $g_CurrentPackages[$e][0])
-		$Mod = _IniRead($ReadSection, 'Name', $g_CurrentPackages[$e][0])
+		Local $ReadSection = IniReadSection($g_MODIni, $g_CurrentPackages[$e][0])
+		Local $Mod = _IniRead($ReadSection, 'Name', $g_CurrentPackages[$e][0])
 		GUICtrlSetData($g_UI_Static[6][2], _GetTR($Message, 'L2') & ' ' & $Mod) ; => checking
 		_Process_SetConsoleLog(_GetTR($Message, 'L2') & ' ' & $Mod & ' ...') ; => checking
 		If _IniRead($ReadSection, 'Save', 'Manual') = 'Manual' Or _IniRead($ReadSection, 'Save', 'Manual') = '' Then
@@ -57,13 +57,13 @@ Func Au3Extract($p_Num = 0)
 ; ---------------------------------------------------------------------------------------------
 ; Check if the tp2-file from the core-mod does exist. If not, try to move the file from within a subdir
 ; ---------------------------------------------------------------------------------------------
-			$TP2Exists = _Test_GetCustomTP2($g_CurrentPackages[$e][0], '\', 1) ; 1 = don't complain if BACKUP mod folder is not found
+			Local $TP2Exists = _Test_GetCustomTP2($g_CurrentPackages[$e][0], '\', 1) ; 1 = don't complain if BACKUP mod folder is not found
 			If $TP2Exists = '0' And $Success <> '0' Then ; Do some more stuff to get it done
-				$DirList = StringSplit(StringStripCR($g_ConsoleOutput), @LF)
+				Local $DirList = StringSplit(StringStripCR($g_ConsoleOutput), @LF)
 				For $n = $DirList[0] To 3 Step -1
 					If StringInStr($DirList[$n], 'Everything is Ok') Then
-						$Dir = StringRegExpReplace($DirList[$n - 2], '(?i)extracting\s*|\x5c.*', '') ; stripped 7z info and everything after a potential backslash
-						$IsDir = FileGetAttrib($g_GameDir & '\' & $Dir) ; get the attrib of this file or directory
+						Local $Dir = StringRegExpReplace($DirList[$n - 2], '(?i)extracting\s*|\x5c.*', '') ; stripped 7z info and everything after a potential backslash
+						Local $IsDir = FileGetAttrib($g_GameDir & '\' & $Dir) ; get the attrib of this file or directory
 						If StringInStr($IsDir, 'D') Then $TP2Exists = _Test_GetCustomTP2($g_CurrentPackages[$e][0], '\' & $Dir & '\', 1) ; 1 = don't complain if BACKUP mod folder is not found
 						ExitLoop
 					EndIf
@@ -72,7 +72,7 @@ Func Au3Extract($p_Num = 0)
 					FileWrite($g_LogFile, '>' & $Dir & '\* .' & @CRLF)
 					_Extract_MoveMod($Dir)
 				Else ; search for archives that are inside the archive
-					$FileList = StringSplit(StringStripCR($g_ConsoleOutput), @LF)
+					Local $FileList = StringSplit(StringStripCR($g_ConsoleOutput), @LF)
 					For $n = 14 To 1 Step -1
 						If StringRegExp($FileList[$n], '(?i)7z\z|rar\z|zip\z') Then
 							If StringInStr($FileList[$n], 'Weidu.exe') Then ContinueLoop ; don't extract WeiDU
@@ -94,10 +94,10 @@ Func Au3Extract($p_Num = 0)
 ; ---------------------------------------------------------------------------------------------
 		$Prefix[3] = _GetTra($ReadSection, 'T') & '-Add' ; adjust the language-addon
 		For $p = 2 To 3
-			$SaveAs = _IniRead($ReadSection, $Prefix[$p] & 'Save', '')
+			Local $SaveAs = _IniRead($ReadSection, $Prefix[$p] & 'Save', '')
 			If $SaveAs <> '' Then
 				If $Success = 1 Then ; all ok
-					$AddSuccess = _Extract_CheckMod($SaveAs, $g_DownDir, $Mod & ' - ' & _GetTR($Message, 'L4')) ; =>additional
+					Local $AddSuccess = _Extract_CheckMod($SaveAs, $g_DownDir, $Mod & ' - ' & _GetTR($Message, 'L4')) ; =>additional
 					If $AddSuccess <> 1 Then
 						IniWrite($g_BWSIni, 'Faults', $g_CurrentPackages[$e][0], IniRead($g_BWSIni, 'Faults', $g_CurrentPackages[$e][0], '') & $p) ; save addon-error
 						$Success = 0 ; save the error for the possible lang-addon
@@ -129,8 +129,8 @@ Func Au3Extract($p_Num = 0)
 				_Misc_MsgGUI(1, _GetTR($Message, 'T1'), _GetTR($Message, 'L5'), 1, _GetTR($Message, 'B1'), '', '', 5) ; => continue in 5 seconds
 			Else
 				ShellExecute($g_GameDir & '\NSIS')
-				$Type = StringRegExpReplace($g_Flags[14], '(?i)BWS|BWP', 'BG2')
-				$Test = _Misc_MsgGUI(3, _GetTR($g_UI_Message, '0-T1'), StringFormat(_GetTR($Message, 'L7'), $Type), 2, _GetTR($g_UI_Message, '8-B3'), _GetTR($Message, 'B1')) ; =>could not close nor move NSIS-files.; =>could not close nor move NSIS-files.
+				Local $Type = StringRegExpReplace($g_Flags[14], '(?i)BWS|BWP', 'BG2')
+				Local $Test = _Misc_MsgGUI(3, _GetTR($g_UI_Message, '0-T1'), StringFormat(_GetTR($Message, 'L7'), $Type), 2, _GetTR($g_UI_Message, '8-B3'), _GetTR($Message, 'B1')) ; =>could not close nor move NSIS-files.; =>could not close nor move NSIS-files.
 				If $Test = 2 Then Exit
 			EndIf
 		EndIf
@@ -164,22 +164,22 @@ Func Au3ExFix($p_Num)
 	EndIf
 	If FileExists($g_GameDir & '\NSIS') Then _Extract_MoveMod('NSIS')
 	; ===============  extract the additional files of Infinity Animations  ===============
-	$7za = _StringVerifyAscII($g_ProgDir) & '\Tools\7z.exe'
+	Local $7za = _StringVerifyAscII($g_ProgDir) & '\Tools\7z.exe'
 	If StringRegExp($g_Flags[14], 'BWP|BWS') And _IniRead($g_CurrentPackages, 'INFINITYANIMATIONS', '') <> '' Then ; IA is only supported for BG2-games and is checked if selected
-		$IATest = IniReadSection($g_UsrIni, 'Save')
+		Local $IATest = IniReadSection($g_UsrIni, 'Save')
 		$IATest[0][1] = '|' ; we'll save the selection here for a stringtest later
 		FileDelete($g_BG2Dir & '\infinityanimations\restore\*') ; delete old stuff that may be faulty
 		FileDelete($g_BG2Dir & '\infinityanimations\content\*')
 		For $c = 1 To 14
 			If StringLen($c) = 1 Then $c = '0' & $c
 			If _IniRead($IATest, 'IAContent' & $c, '') <> '' Then ; Content was selected
-				$ReadSection = IniReadSection($g_MODIni, 'IAContent' & $c)
-				$Save = _IniRead($ReadSection, 'Save', '')
+				Local $ReadSection = IniReadSection($g_MODIni, 'IAContent' & $c)
+				Local $Save = _IniRead($ReadSection, 'Save', '')
 				If $Save = '' Then ContinueLoop
 				If Not FileExists($g_DownDir & '\' & $Save) Then ContinueLoop
 				$IATest[0][1] &= StringRight('IAContent' & $c, 2) & '|' ; append selected package number
-				$Mod = _IniRead($ReadSection, 'Name', 'IAContent' & $c)
-				$iSize = Round(_IniRead($ReadSection, 'Size', 0) / (1024 * 1024), 1)
+				Local $Mod = _IniRead($ReadSection, 'Name', 'IAContent' & $c)
+				Local $iSize = Round(_IniRead($ReadSection, 'Size', 0) / (1024 * 1024), 1)
 				If $iSize = '0.0' Then $iSize = '0.1'
 				GUICtrlSetData($g_UI_Static[6][2], IniRead($g_TRAIni, 'Ex-CheckMod', 'L1', '') & ' ' & $Mod & ' (' & $iSize & ' MB)') ; set "extraction"-info
 				If StringInStr($Save, 'Restore') Then ; get the correct path
@@ -197,7 +197,7 @@ Func Au3ExFix($p_Num)
 		_FileSearchDelete($g_BG2Dir & '\infinityanimations\content', '*', 'D') ; remove the empty folders
 		If StringRegExp($IATest[0][1], '\x7c(02|03|04|05|06|07|09|10|11|12|13|14)\x7c') Then ; archive contains extended ascii/ansi
 			Local $IATest[8] = [7, 162, 163, 181, 198, 216, 230, 248] ; these are characters that are used
-			$Found = 0
+			Local $Found = 0
 			For $i = 1 To $IATest[0]
 				If FileExists($g_BG2Dir & '\infinityanimations\content\' & Chr($IATest[$i]) & '*') Then ; found one => codepage should be ok
 					$Found = 1
@@ -205,12 +205,12 @@ Func Au3ExFix($p_Num)
 				EndIf
 			Next
 			If $Found = 0 Then ; possible codepage-error
-				$String = ''
+				Local $String = ''
 				For $i = 1 To $IATest[0]
 					$String &= ' ' & Chr($IATest[$i])
 				Next
 				$String = StringTrimLeft($String, 1)
-				$Answer = _Misc_MsgGUI(3, _GetTR($g_UI_Message, '0-T1'), StringFormat(_IniRead($Message, 'L8', ''), $String, 'infinityanimations\content'), 2) ; => not all files were found
+				Local $Answer = _Misc_MsgGUI(3, _GetTR($g_UI_Message, '0-T1'), StringFormat(_IniRead($Message, 'L8', ''), $String, 'infinityanimations\content'), 2) ; => not all files were found
 				If $Answer = 1 Then Exit
 			EndIf
 		EndIf
@@ -221,14 +221,14 @@ Func Au3ExFix($p_Num)
 		FileMove($g_BG2Dir & '\A4Auror\Setup-A4Auror.exe', $g_BG2Dir & '\Setup-A4Auror.exe')
 	EndIf
 	If FileExists($g_GameDir & '\randomiser') Then
-		$TP2Exists = _Test_GetCustomTP2('randomiser', '\randomiser\randomiser', 1) ; 1 = don't complain if BACKUP mod folder is not found
+		Local $TP2Exists = _Test_GetCustomTP2('randomiser', '\randomiser\randomiser', 1) ; 1 = don't complain if BACKUP mod folder is not found
 		If $TP2Exists <> '1' Then ; randomiser.tp2 exist
 			FileWrite($g_LogFile, '>randomiser\* .' & @CRLF)
 			_Extract_MoveModEx('randomiser')
 		EndIf
 	EndIf
 	If FileExists($g_GameDir & '\CtBv1.13a\CtBv1.13') Then
-		$TP2Exists = _Test_GetCustomTP2('CTB', '\CtBv1.13a\CtBv1.13\', 1) ; 1 = don't complain if BACKUP mod folder is not found
+		Local $TP2Exists = _Test_GetCustomTP2('CTB', '\CtBv1.13a\CtBv1.13\', 1) ; 1 = don't complain if BACKUP mod folder is not found
 		If $TP2Exists <> '0' Then ; this is a folder
 			FileWrite($g_LogFile, '>CtBv1.13a\CtBv1.13\* .' & @CRLF)
 			_Extract_MoveMod('CtBv1.13a\CtBv1.13')
@@ -256,19 +256,19 @@ Func Au3ExFix($p_Num)
 	EndIf
 	; ==============  Fix textstring so weidu will not fail to install the mod ============
 	If StringRegExp($g_Flags[14], 'BWP|BWS') And FileExists($g_BG2Dir & '\setup-bonehillv275.exe') Then
-		$Text = FileRead($g_BG2Dir & '\bonehillv275\Language\deutsch\D\BHARRNES.TRA')
+		Local $Text = FileRead($g_BG2Dir & '\bonehillv275\Language\deutsch\D\BHARRNES.TRA')
 		If StringRegExp($Text, '\r\nlassen') Then
 			$Text = StringReplace($Text, @CRLF & 'lassen. Habt Ihr verstanden? ~ ' & @CRLF, @CRLF)
 			$Text = StringReplace($Text, 'werde ich Euch kommen ', 'werde ich Euch kommen lassen. Habt Ihr verstanden? ~ ')
-			$Handle = FileOpen($g_BG2Dir & '\bonehillv275\Language\deutsch\D\BHARRNES.TRA', 2)
+			Local $Handle = FileOpen($g_BG2Dir & '\bonehillv275\Language\deutsch\D\BHARRNES.TRA', 2)
 			FileWrite($Handle, $Text)
 			FileClose($Handle)
 		EndIf
 	ElseIf $g_Flags[14] = 'IWD2' And FileExists($g_IWD2Dir & '\Setup-LOS.exe') Then
-		$Text = FileRead($g_IWD2Dir & '\LOS\dlg\f#bowyer.d')
+		Local $Text = FileRead($g_IWD2Dir & '\LOS\dlg\f#bowyer.d')
 		If StringInStr($Text, 'See([ENEMY], FALSE)') Then
 			$Text = StringReplace($Text, 'See([ENEMY], FALSE)', 'See([ENEMY], 0)')
-			$Handle = FileOpen($g_IWD2Dir & '\LOS\dlg\f#bowyer.d', 2)
+			Local $Handle = FileOpen($g_IWD2Dir & '\LOS\dlg\f#bowyer.d', 2)
 			FileWrite($Handle, $Text)
 			FileClose($Handle)
 			$Text = StringReplace(FileRead($g_IWD2Dir & '\LOS\dlg\f#susu.d'), 'See([ENEMY], FALSE)', 'See([ENEMY], 0)')
@@ -279,9 +279,9 @@ Func Au3ExFix($p_Num)
 	EndIf
 	; ==============      Fix keyword-test for _Test_GetModFolder-function     ============
 	If StringRegExp($g_Flags[14], 'BWP|BWS') And FileExists($g_BG2Dir & '\dsotsc\setup-dsotsc.tp2') Then
-		$Text = FileRead($g_BG2Dir & '\dsotsc\setup-dsotsc.tp2')
+		Local $Text = FileRead($g_BG2Dir & '\dsotsc\setup-dsotsc.tp2')
 		If StringInStr($Text, Chr(0)) Then
-			$Handle = FileOpen($g_BG2Dir & '\dsotsc\setup-dsotsc.tp2', 2) ; Open for overwriting
+			Local $Handle = FileOpen($g_BG2Dir & '\dsotsc\setup-dsotsc.tp2', 2) ; Open for overwriting
 			FileWrite($Handle, StringReplace($Text, Chr(0), ''))
 			FileClose($Handle)
 		EndIf
@@ -316,18 +316,18 @@ Func Au3ExFix($p_Num)
 ; Add missing archives (e.g. NSIS-extractions)
 ; ---------------------------------------------------------------------------------------------
 	For $e = 1 To $g_CurrentPackages[0][0] ; get errors of installer packages
-		$ReadSection = IniReadSection($g_MODIni, $g_CurrentPackages[$e][0])
+		Local $ReadSection = IniReadSection($g_MODIni, $g_CurrentPackages[$e][0])
 		GUICtrlSetData($g_UI_Interact[6][1], ($e * 100) / $g_CurrentPackages[0][0])
 		GUICtrlSetData($g_UI_Static[6][2], _GetTR($Message, 'L2') & ' ' & _IniRead($ReadSection, 'Name', $g_CurrentPackages[$e][0]) & ' ...') ; => checking
 		If _IniRead($ReadSection, 'Save', 'Manual') = 'Manual' Then ContinueLoop
-		$TP2Exists = _Test_GetCustomTP2($g_CurrentPackages[$e][0], '\', 1) ; test if packaging file is found, 1 = don't complain if BACKUP mod folder is not found
+		Local $TP2Exists = _Test_GetCustomTP2($g_CurrentPackages[$e][0], '\', 1) ; test if packaging file is found, 1 = don't complain if BACKUP mod folder is not found
 		If @error Then
-			$Test = _IniRead($ReadSection, 'Test', '')
+			Local $Test = _IniRead($ReadSection, 'Test', '')
 			If $Test <> '' Then ; check for a file if package is not a weidu-mod
 				$Test = StringSplit($Test, ':')
 				If FileExists($g_GameDir & '\' & $Test[1]) Then ContinueLoop
 			EndIf
-			$Fault = IniRead($g_BWSIni, 'Faults', $g_CurrentPackages[$e][0], '')
+			Local $Fault = IniRead($g_BWSIni, 'Faults', $g_CurrentPackages[$e][0], '')
 			If Not StringInStr($Fault, '1') Then IniWrite($g_BWSIni, 'Faults', $g_CurrentPackages[$e][0], '1' & $Fault) ; save the error
 		EndIf
 	Next
@@ -345,13 +345,13 @@ Func Au3ExFix($p_Num)
 			If $g_Flags[0] = 0 Then ; the exit button was pressed
 				Exit
 			EndIf
-			$ReadSection = IniReadSection($g_MODIni, $Fault[$f][0])
-			$Mod = _IniRead($ReadSection, 'Name', $Fault[$f][0])
+			Local $ReadSection = IniReadSection($g_MODIni, $Fault[$f][0])
+			Local $Mod = _IniRead($ReadSection, 'Name', $Fault[$f][0])
 			_Process_SetConsoleLog(_GetTR($Message, 'L2') & ' ' & $Mod & ' ...') ; => checking
 			If StringInStr($Fault[$f][1], '1') Then ; remove whole mod
-				$TP2 = _Test_GetTP2($Fault[$f][0], '\')
+				Local $TP2 = _Test_GetTP2($Fault[$f][0], '\')
 				If $TP2 = '0' Then
-					$Rename = IniRead($g_MODIni, $Fault[$f][0], 'REN', '') ; look for some non-standard-filenames that will be renamed later
+					Local $Rename = IniRead($g_MODIni, $Fault[$f][0], 'REN', '') ; look for some non-standard-filenames that will be renamed later
 					If $Rename <> '' Then $TP2 = _Test_GetTP2($Rename, '\')
 				EndIf
 				If $TP2 <> '0' Then
@@ -365,7 +365,7 @@ Func Au3ExFix($p_Num)
 				EndIf
 			EndIf
 			If StringRegExp($Fault[$f][1], '2|4') Then ; remove file from addon-test
-				$Test = StringSplit(_IniRead($ReadSection, 'AddTest', ''), ':')
+				Local $Test = StringSplit(_IniRead($ReadSection, 'AddTest', ''), ':')
 				If FileExists($g_GameDir & '\' & $Test[1]) And StringRegExp($Test[1], '\A[^.]{1,}\x2e') Then FileDelete($g_GameDir & '\' & $Test[1])
 			EndIf
 			If StringRegExp($Fault[$f][1], '3|5') Then ; remove file from language-addon-test
@@ -387,7 +387,7 @@ Func Au3ExTest($p_Num = 0)
 	$g_LogFile = $g_LogDir & '\BiG World Extract Debug.txt'
 	Local $Message = IniReadSection($g_TRAIni, 'Ex-Au3TestExtract'), $FNum = ''
 	_Process_SwitchEdit(1, 0)
-	$Type = StringRegExpReplace($g_Flags[14], '(?i)BWS|BWP', 'BG2')
+	Local $Type = StringRegExpReplace($g_Flags[14], '(?i)BWS|BWP', 'BG2')
 	GUICtrlSetData($g_UI_Interact[6][4], StringReplace(_GetSTR($Message, 'H1'), '%s', $Type)) ; => help text
 	GUICtrlSetData($g_UI_Interact[6][1], 0)
 	GUICtrlSetData($g_UI_Static[6][1], _GetTR($Message, 'L1')) ; => watch progress
@@ -402,7 +402,7 @@ Func Au3ExTest($p_Num = 0)
 ; ---------------------------------------------------------------------------------------------
 ; Test if errors exist
 ; ---------------------------------------------------------------------------------------------
-	$Test = _Extract_ListMissing()
+	Local $Test = _Extract_ListMissing()
 	If $Test[0][2] = 0 And $Test[0][3] = 0 Then
 		_Extract_EndAu3ExTest()
 		Return
@@ -432,10 +432,10 @@ Func Au3ExTest($p_Num = 0)
 	_Process_SetScrollLog(_GetTR($Message, 'L3'), 1, -1) ; => mods are missing. test, provide or skip missing files?
 	_Process_Question('t|p|c', _GetTR($Message, 'L4'), _GetTR($Message, 'Q1'), 3, $g_Flags[18]) ; => test, provide or skip missing files?
 	If $g_pQuestion = 't' Then
-		$CRCError = 0
+		Local $CRCError = 0
 		$Fault = IniReadSection($g_BWSIni, 'Faults')
 		For $f = 1 To $Fault[0][0]
-			$ReadSection = IniReadSection($g_MODIni, $Fault[$f][0])
+			Local $ReadSection = IniReadSection($g_MODIni, $Fault[$f][0])
 			GUICtrlSetData($g_UI_Static[6][2], _GetTR($Message, 'L2') & ' ' & _IniRead($ReadSection, 'Name', $Fault[$f][0]) & ' ...') ; => checking
 			For $l = 1 To StringLen($Fault[$f][1])
 				$Type = StringMid($Fault[$f][1], $l, 1)
@@ -446,7 +446,7 @@ Func Au3ExTest($p_Num = 0)
 				ElseIf $Type = '3' Or $Type = '5' Then
 					Local $Type = _GetTra($ReadSection, 'T') & '-AddSave' ; adjust the language-addon
 				EndIf
-				$Archive = _IniRead($ReadSection, $Type, 'Manual')
+				Local $Archive = _IniRead($ReadSection, $Type, 'Manual')
 				If $Archive <> 'Manual' And FileExists($g_DownDir & '\' & $Archive) Then
 					If _Extract_TestIntegrity($Archive) = 0 Then
 						If $CRCError = 0 Then
@@ -462,7 +462,7 @@ Func Au3ExTest($p_Num = 0)
 		_Process_Question('p|c', _GetTR($Message, 'L15'), _GetTR($Message, 'Q5'), 2, $g_Flags[18]) ; => provide or skip missing files?
 	EndIf
 	If $g_pQuestion = 'p' Then
-		$Extract = 0
+		Local $Extract = 0
 		$Fault = IniReadSection($g_BWSIni, 'Faults')
 		For $f = 1 To $Fault[0][0]
 			$ReadSection = IniReadSection($g_MODIni, $Fault[$f][0])
@@ -482,7 +482,7 @@ Func Au3ExTest($p_Num = 0)
 				If $g_pQuestion = 'o' Then ContinueLoop (2) ; skip one mod
 				If $g_pQuestion = 'a' Then ExitLoop (2) ; skip all mods
 				If $g_pQuestion = 'd' Then
-					$URL = _IniRead($ReadSection, StringReplace($Type, 'Save', 'Down'), '')
+					Local $URL = _IniRead($ReadSection, StringReplace($Type, 'Save', 'Down'), '')
 					If $URL <> '' And $URL <> 'Manual' Then ShellExecute($URL) ; start browser
 				EndIf
 				If $g_pQuestion = 'e' And $Archive <> 'Manual' And FileExists($g_DownDir & '\' & $Archive) Then ShellExecute($g_DownDir & '\' & $Archive) ; start zip
@@ -603,13 +603,13 @@ EndFunc   ;==>_Extract_7z
 ; Extract $p_Save-file from $p_Mod if it exists to $p_Folder
 ; ---------------------------------------------------------------------------------------------
 Func _Extract_CaseRemove($p_Mod, $p_Folder, $p_Save = 'Save')
-	$ReadSection = IniReadSection($g_MODIni, $p_Mod)
+	Local $ReadSection = IniReadSection($g_MODIni, $p_Mod)
 	If $p_Save = '-' Then $p_Save = _GetTra($ReadSection, 'T') & '-AddSave'
-	$Save = _IniRead($ReadSection, $p_Save, '')
+	Local $Save = _IniRead($ReadSection, $p_Save, '')
 	If $Save = '' Then Return ; don't extract the complete download-folder
-	$Mod = _IniRead($ReadSection, 'Name', '')
+	Local $Mod = _IniRead($ReadSection, 'Name', '')
 	If FileExists($g_DownDir & '\' & $Save) Then
-		$Success = _Extract_7z($g_DownDir & '\' & $Save, $p_Folder, $Mod)
+		Local $Success = _Extract_7z($g_DownDir & '\' & $Save, $p_Folder, $Mod)
 		If $Success <> 1 Then
 			IniWrite($g_BWSIni, 'Faults', $p_Mod, 1) ; save the error
 		Else
@@ -669,11 +669,11 @@ EndFunc   ;==>_Extract_CheckMod
 ; ---------------------------------------------------------------------------------------------
 Func _Extract_InstallNSIS($p_Dir) ; $p_Dir=dir
 	Local $Message = IniReadSection($g_TRAIni, 'Ex-InstallNSIS')
-	$Found = 0
-	$Files = _FileSearch($p_Dir, '*.exe')
+	Local $Found = 0
+	Local $Files = _FileSearch($p_Dir, '*.exe')
 	For $f = 1 To $Files[0]
 		If StringInStr($Files[$f], 'Setup-') Then ContinueLoop ; leave out weidu
-		$FileBody = FileRead($p_Dir & '\' & $Files[$f], 1024 * 50)
+		Local $FileBody = FileRead($p_Dir & '\' & $Files[$f], 1024 * 50)
 		If StringInStr($FileBody, 'Nullsoft') Then
 			If $Found = 0 Then
 				If IniRead($g_UsrIni, 'Options', 'Logic2', 1) = 2 Then ; don't halt NSIS-message if it's an over-night-installation (Logic2=2)
@@ -694,11 +694,11 @@ Func _Extract_InstallNSIS($p_Dir) ; $p_Dir=dir
 				Sleep(100)
 			WEnd
 			If StringInStr($Files[$f], 'CespyAudio') Then
-				$Test = WinWaitActive('[REGEXPTITLE:c2audioREADME]', '', 60)
+				Local $Test = WinWaitActive('[REGEXPTITLE:c2audioREADME]', '', 60)
 				WinClose('[REGEXPTITLE:c2audioREADME]')
 			EndIf
 			While 1 ; delete the setup after executing it
-				$Success = FileDelete($p_Dir & '\' & $Files[$f])
+				Local $Success = FileDelete($p_Dir & '\' & $Files[$f])
 				If $Success = 1 Then ExitLoop
 			WEnd
 		EndIf
@@ -721,8 +721,8 @@ Func _Extract_ListMissing()
 	EndIf
 	_Process_SetScrollLog(_GetTR($Message, 'L1')) ; => The extraction of the following mod(s) failed:
 	For $f = 1 To $Fault[0][0]
-		$ReadSection = IniReadSection($g_MODIni, $Fault[$f][0])
-		$Mod = _IniRead($ReadSection, 'Name', $Fault[$f][0])
+		Local $ReadSection = IniReadSection($g_MODIni, $Fault[$f][0])
+		Local $Mod = _IniRead($ReadSection, 'Name', $Fault[$f][0])
 		If StringInStr($Fault[$f][1], '1') Then ; check for TP2
 			If _Test_GetCustomTP2($Fault[$f][0], '\', 1) <> '0' Then ; 1 = don't complain if BACKUP mod folder is not found
 				$Fault[$f][1] = StringRegExpReplace($Fault[$f][1], '1', '')
@@ -755,7 +755,7 @@ Func _Extract_ListMissing()
 			$Mark &= ' ' & Chr(0xB9) ; if mod is fixed, mark as missing essential
 		EndIf
 		For $l = 1 To StringLen($Fault[$f][1])
-			$Type = StringMid($Fault[$f][1], $l, 1)
+			Local $Type = StringMid($Fault[$f][1], $l, 1)
 			If $Type = '1' Then
 				Local $Type = 'Save', $Hint = _GetTR($Message, 'L2') ; => main
 			ElseIf $Type = '2' Then
@@ -880,9 +880,9 @@ EndFunc   ;==>_Extract_TestFile
 ; ---------------------------------------------------------------------------------------------
 Func _Extract_TestIntegrity($p_File)
 	Local $7za = $g_ProgDir & '\Tools\7z.exe'
-	$PID = Run($7za & ' t "' & $g_DownDir & '\' & $p_File & '"', $g_DownDir, @SW_HIDE, 8)
+	Local $PID = Run($7za & ' t "' & $g_DownDir & '\' & $p_File & '"', $g_DownDir, @SW_HIDE, 8)
 	ProcessWaitClose($PID)
-	$Output = StdoutRead($PID)
+	Local $Output = StdoutRead($PID)
 	If StringInStr($Output, 'Everything is Ok') Then Return 1
 	Return 0
 EndFunc   ;==>_Extract_TestIntegrity

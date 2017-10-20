@@ -29,11 +29,11 @@ Func Au3CleanInst($p_Num = 0, $p_Tab = 6) ;1=first timer, 2=backup, 3=restore
 		GUICtrlSetData($g_UI_Static[6][1], _GetTR($Message, 'L10')) ; => watch process
 		GUICtrlSetData($g_UI_Static[6][2], StringFormat(_GetTR($Message, 'L12'), $g_BackupDir)) ; => create backup at
 		_Process_SwitchEdit(1, 0)
-		$Test = _Backup_Test($Type) ; 0=done / 1=done & mods already installed / 2 = not done / 3=not done & mods already installed
+		Local $Test = _Backup_Test($Type) ; 0=done / 1=done & mods already installed / 2 = not done / 3=not done & mods already installed
 		If $Test = 0 Then ; backup was done before
 			IniWrite($g_BWSIni, 'Order', 'Au3CleanInst', 0)
 		ElseIf $Test = 1 Then ; backup was done, but mods were installed
-			$Error = _Backup_Restore(6)
+			Local $Error = _Backup_Restore(6)
 			$Action = 2 ; set restore-mode
 		ElseIf $Test = 2 Then ; backup was not done before
 			GUICtrlSetState($g_UI_Interact[6][2], $GUI_SHOW)
@@ -131,10 +131,10 @@ Func _Backup_Create($p_Game, $p_Message)
 	Local $Size, $CSize, $Error = 0, $FileList
 	_Process_SetScrollLog('')
 	FileClose(FileOpen($g_LogFile, 2))
-	$Files = _FileSearch($g_GameDir, '*') ; save the files that exist now and calculate the size of the backup
+	Local $Files = _FileSearch($g_GameDir, '*') ; save the files that exist now and calculate the size of the backup
 	Local $Section[$Files[0] + 8][2] ; files + fixed files that are possibly missing
 	For $f = 1 To $Files[0]
-		$IsDir = StringRegExp(FileGetAttrib($g_GameDir & '\' & $Files[$f]), 'D')
+		Local $IsDir = StringRegExp(FileGetAttrib($g_GameDir & '\' & $Files[$f]), 'D')
 		_IniWrite($Section, $Files[$f], $IsDir, 'N')
 		If StringRegExp($Files[$f], '(?i)\A(\x2e?|mplay.*|nwn_1.mpg|(GS)?Arcade.*|glsetup.exe)\z') Then ContinueLoop ; don't copy useless files
 		If StringRight($Files[$f], 4) = '.bif' And $p_Game = 'PST' Then ContinueLoop ; PST has no data-folder but installs all files into the root-folder
@@ -188,7 +188,7 @@ Func _Backup_CreateMultiInstall()
 		If $Game[$g][0] = $Type Then ExitLoop
 	Next
 	FileClose(FileOpen($g_LogFile, 2))
-	$Test = _Backup_Test($Type)
+	Local $Test = _Backup_Test($Type)
 	If $Test <> 3 Then
 		$MultiDir = FileSelectFolder(_GetTR($Message, 'F1'), '', 3, $g_BaseDir & '\', $g_UI[0]) ; => select folder
 		If $MultiDir = '' Then Return
@@ -203,7 +203,7 @@ Func _Backup_CreateMultiInstall()
 		_Process_SetScrollLog(_GetTR($Message, 'L12'), 1, -1) ; => same dir
 		$Error = 1
 	Else
-		$IsInstalled = 0
+		Local $IsInstalled = 0
 		For $i = 1 To $Game[0][0]
 			If FileExists($MultiDir & '\' & $Game[$i][1] & '.exe') Then $IsInstalled = 1 ; this is a game-folder
 		Next
@@ -242,10 +242,10 @@ Func _Backup_CreateMultiInstall()
 	For $c = 1 To 6
 		$Size -= DirGetSize($g_GameDir & '\CD' & $c)
 	Next
-	$Files = _FileSearch($g_GameDir, '*')
+	Local $Files = _FileSearch($g_GameDir, '*')
 	For $f = 1 To $Files[0]
 		If StringRegExp($Files[$f], '(?i)\A(BiG World Backup|BiG World Downloads|BiG World Setup|CD\d|\x2e?|mplay.*|nwn_1.mpg|(GS)?Arcade.*|glsetup.exe)\z') Then ContinueLoop ; don't copy useless stuff
-		$IsDir = StringRegExp(FileGetAttrib($g_GameDir & '\' & $Files[$f]), 'D')
+		Local $IsDir = StringRegExp(FileGetAttrib($g_GameDir & '\' & $Files[$f]), 'D')
 		$Error += _Backup_FileAction($Files[$f], $g_GameDir, $MultiDir, $IsDir, $CSize, $Size, $FMessage)
 	Next
 	If $Error = 0 Then ; all right
@@ -266,7 +266,7 @@ Func _Backup_CreateMultiInstall()
 		_Process_SetScrollLog(@CRLF & _GetTR($Message, 'L4'), 1, -1) ; => creation: success. create a link?
 		_Process_Question('y|n', _GetTR($Message, 'L5'), _GetTR($Message, 'Q1')) ; => enter yes/no
 		If $g_pQuestion = 'y' Then
-			$Num = ''
+			Local $Num = ''
 			While FileExists(@DesktopDir & '\BiG World - ' & $g_Flags[14] & '.lnk')
 				$Num += 1
 			WEnd
@@ -291,14 +291,14 @@ Func _Backup_FileAction($p_File, $p_Parent, $p_Dir, $p_Num, ByRef $p_Progress, $
 	EndIf
 	$p_Dir = $p_Dir & '\' & $p_File
 	If $p_Num = 0 Then
-		$Size = FileGetSize($p_Parent)
+		Local $Size = FileGetSize($p_Parent)
 		$p_Progress += $Size
 		GUICtrlSetData($g_UI_Static[6][2], _GetTR($p_Message, 'L5') & ' ' & $p_File & ' (' & Round($Size / 1048576, 1) & ' MB)') ; =>copy: file
-		$Success = FileCopy($p_Parent, $p_Dir, 1)
+		Local $Success = FileCopy($p_Parent, $p_Dir, 1)
 		GUICtrlSetData($g_UI_Interact[6][1], ($p_Progress * 100) / $p_CompSize)
 	ElseIf $p_Num = 1 Then
 		GUICtrlSetData($g_UI_Static[6][2], _GetTR($p_Message, 'L5') & ' ' & $p_File & ' (' & Round(DirGetSize($p_Parent) / 1048576, 1) & ' MB)') ; =>copy: folder
-		$Files = _FileSearch($p_Parent, '*')
+		Local $Files = _FileSearch($p_Parent, '*')
 		$Success = 0
 		For $f = 1 To $Files[0]
 			If StringInStr(FileGetAttrib($p_Parent & '\' & $Files[$f]), 'D') Then
@@ -386,8 +386,8 @@ Func _Backup_Restore($p_Tab)
 ; Delete mod-content (unpacked installation files or installed/in-game files)
 ; ---------------------------------------------------------------------------------------------
 	If FileExists($g_GameDir & '\*save') Then
-		$UniqueDir = $g_RemovedDir & '\' & @YEAR & @MON & @MDAY & '_'
-		$UniqueNum = 1
+		Local $UniqueDir = $g_RemovedDir & '\' & @YEAR & @MON & @MDAY & '_'
+		Local $UniqueNum = 1
 		While 1
 			If FileExists($UniqueDir & $UniqueNum) Then
 				$UniqueNum += 1
@@ -400,12 +400,12 @@ Func _Backup_Restore($p_Tab)
 		If FileExists($g_GameDir & '\mpsave') Then $Error += _Backup_FileAction('mpsave', $g_GameDir, $UniqueDir & $UniqueNum, 5, $CSize, $Size, $FMessage)
 	EndIf
 	If StringRegExp($g_Flags[14], 'BWS|BWP') Then
-		$IsGoG = FileExists($g_BG2Dir & '\goggame.dll')
+		Local $IsGoG = FileExists($g_BG2Dir & '\goggame.dll')
 		FileSetAttrib($g_BG2Dir & '\Clean-Up.bat', '-RAS') ; remove read-only-bit
-		$DataFiles = _FileSearch($g_BG2Dir & '\Data', '*') ; delete bif-files created by mods
+		Local $DataFiles = _FileSearch($g_BG2Dir & '\Data', '*') ; delete bif-files created by mods
 		For $d = 1 To $DataFiles[0]
 			If Not StringRegExp($DataFiles[$d], '(?i)\A(' & $BifList & ').bif') Then
-				$IsDir = StringRegExp(FileGetAttrib($g_BG2Dir & '\Data\' & $DataFiles[$d]), 'D')
+				Local $IsDir = StringRegExp(FileGetAttrib($g_BG2Dir & '\Data\' & $DataFiles[$d]), 'D')
 				If $IsGoG And $IsDir And StringRegExp($DataFiles[$d], '(?i)\A(data|movies)\z') Then ContinueLoop
 				$Error += _Backup_FileAction($DataFiles[$d], $g_BG2Dir & '\Data', $g_RemovedDir & '\Data', 2 + $IsDir + $Save, $CSize, $Size, $FMessage)
 			EndIf
@@ -414,7 +414,7 @@ Func _Backup_Restore($p_Tab)
 		FileSetAttrib($g_IWD2Dir & '\Readme.htm', '-RAS') ; remove read-only-bit
 	EndIf
 	FileDelete($g_GameDir & '\Data\tb#gen*.bif') ; remove generic biffed files
-	$BakFiles = _FileSearch($g_BackupDir, '*') ; delete files from bg2-folder which exist in the backup-folder
+	Local $BakFiles = _FileSearch($g_BackupDir, '*') ; delete files from bg2-folder which exist in the backup-folder
 	For $b = 1 To $BakFiles[0]
 		If StringRegExp($BakFiles[$b], '(?i)\A(CD\d|BiG World Downloads|BiG World Backup|BiG World Setup|Portraits)\z') Then ContinueLoop ; do >>not<< remove useful or essential folders
 		If FileExists($g_GameDir & '\' & $BakFiles[$b]) Then
@@ -422,13 +422,13 @@ Func _Backup_Restore($p_Tab)
 			$Error += _Backup_FileAction($BakFiles[$b], $g_GameDir, $g_RemovedDir, 2 + $IsDir + $Save, $CSize, $Size, $FMessage)
 		EndIf
 	Next
-	$ReadSection = IniReadSection($g_BackupDir & '\BWS_Backup.ini', 'Root')
+	Local $ReadSection = IniReadSection($g_BackupDir & '\BWS_Backup.ini', 'Root')
 	If Not @error Then ; do not remove any additional files if this is missing!!!
 ; ---------------------------------------------------------------------------------------------
 ; collect/list/detect mods content
 ; ---------------------------------------------------------------------------------------------
 		GUICtrlSetData($g_UI_Static[6][2], _GetTR($Message, 'L18')) ; =>searching unneeded
-		$Files = _FileSearch($g_GameDir, '*')
+		Local $Files = _FileSearch($g_GameDir, '*')
 		Local $FileList[$Files[0] + 1][2]
 		For $f = 1 To $Files[0]
 			If _IniRead($ReadSection, $Files[$f], -1) <> -1 Then ContinueLoop ; includes portraits, save, mpsave, BiG World Setup + its vbs, BiG World Backup, BiG World Downloads
@@ -490,7 +490,7 @@ Func _Backup_Test($p_Game)
 	For $g = 1 To $Game[0][0]
 		If $Game[$g][0] = $p_Game Then ExitLoop
 	Next
-	$Test = StringRegExp(FileRead(Eval('g_' & $p_Game & 'Dir') & '\WeiDU.log'), @LF & '~.*#.\s#', 3)
+	Local $Test = StringRegExp(FileRead(Eval('g_' & $p_Game & 'Dir') & '\WeiDU.log'), @LF & '~.*#.\s#', 3)
 	If IsArray($Test) Then
 		For $t = 0 To UBound($Test) - 1
 			If Not StringInStr($Test[$t], 'DDRAW') Then $IsInstalled = 1
