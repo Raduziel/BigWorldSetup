@@ -20,7 +20,9 @@ Global $g_Compilation = 'R', $g_LimitedSelection = 0, $g_Tags, $g_ActiveConnecti
 Global $g_TreeviewItem[1][1], $g_CHTreeviewItem[1][1], $g_Connections, $g_CentralArray[1][16], $g_GUIFold
 ; Logging, Reading Streams / Process-Window
 Global $g_ConsoleOutput = '', $g_STDStream, $g_ConsoleOutput, $g_pQuestion = 0
-; program options and misc
+; Global for saving the current power-savings 'execution state'.
+Global $g_Power
+; Program options and misc.
 Global $g_Order, $g_Setups, $g_Skip, $g_Clip; available setups, items to skip
 Global $g_CurrentPackages, $g_fLock, $g_FItem = IniRead($g_BWSIni, 'Options', 'Start', '1'); selected packages, fixed mods and last processed item
 Global $g_ATrans = StringSplit(IniRead($g_BWSIni, 'Options', 'AppLang', 'EN|GE'), '|'), $g_ATNum = 1, $g_MLang; available translations and mod translations
@@ -95,6 +97,9 @@ Global $g_TRAIni = $g_ProgDir & '\Config\Translation-' & $g_ATrans[$g_ATNum] & '
 
 ;#NoTrayIcon
 
+; Call these functions to store the power save settings in case the scripts are terminated.
+$g_Power = _PowerKeepAlive()
+_PowerResetState()
 
 $g_Order = IniReadSection($g_BWSIni, 'Order'); reload this to get the new selected functions
 
@@ -110,6 +115,10 @@ Next
 ; ---------------------------------------------------------------------------------------------
 Func Au3Exit($p_Num = 0)
 	_PrintDebug('+' & @ScriptLineNumber & ' Calling Au3Exit')
+
+	; Just in case the script is closed early from an error catch within a function, restore the power save settings.
+	_PowerResetState()
+
 	DllClose($g_UDll); close the dll for detecting "space"-keypresses
 	If $g_STDStream <> '' Then; close the backend-cmd-instance
 		StdinWrite($g_STDStream, 'exit' & @CRLF)

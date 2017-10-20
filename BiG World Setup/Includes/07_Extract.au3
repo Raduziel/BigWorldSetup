@@ -6,6 +6,10 @@
 Func Au3Extract($p_Num = 0)
 	Local $Message = IniReadSection($g_TRAIni, 'Ex-Au3Extract')
 	_PrintDebug('+' & @ScriptLineNumber & ' Calling Au3Extract')
+
+    ; Extracting could take some time so disable screensaver, power save, etc.
+    $g_Power = _PowerKeepAlive()
+
 	$g_LogFile = $g_LogDir & '\BiG World Extract Debug.txt'
 	$g_CurrentPackages = _GetCurrent() ; items may be removed due to EET-install-exception
 	_Process_SwitchEdit(0, 1)
@@ -132,6 +136,9 @@ Func Au3Extract($p_Num = 0)
 		EndIf
 	EndIf
 	IniWrite($g_BWSIni, 'Order', 'Au3Extract', 0) ; Skip this one if the Setup is rerun
+
+    ; Restore screensaver and power save settings.
+    _PowerResetState()
 EndFunc   ;==>Au3Extract
 
 ; ---------------------------------------------------------------------------------------------

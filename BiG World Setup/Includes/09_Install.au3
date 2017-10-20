@@ -109,6 +109,10 @@ EndFunc   ;==>Au3PrepInst
 ; ---------------------------------------------------------------------------------------------
 Func Au3RunFix($p_Num = 0)
 	_PrintDebug('+' & @ScriptLineNumber & ' Calling Au3RunFix')
+
+    ; These install functions could take some time so disable screensaver, power save, etc.
+    $g_Power = _PowerKeepAlive()
+
 	Local $Message = IniReadSection($g_TRAIni, 'IN-Au3RunFix')
 	$Type = StringRegExpReplace($g_Flags[14], '(?i)BWS|BWP', 'BG2')
 	_Process_SwitchEdit(0, 0)
@@ -269,6 +273,9 @@ Func Au3RunFix($p_Num = 0)
 	Else
 		_Misc_MsgGUI(2, _GetTR($Message, 'L7'), _GetTR($Message, 'L8')) ; => pre-install-info
 	EndIf
+
+    ; Restore screensaver and power save settings.
+    _PowerResetState()
 EndFunc   ;==>Au3RunFix
 
 ; ---------------------------------------------------------------------------------------------
@@ -276,6 +283,10 @@ EndFunc   ;==>Au3RunFix
 ; ---------------------------------------------------------------------------------------------
 Func Au3Install($p_Num = 0, $p_Debug = 0)
 	_PrintDebug('+' & @ScriptLineNumber & ' Calling Au3Install')
+
+    ; These install functions could take some time so disable screensaver, power save, etc.
+    $g_Power = _PowerKeepAlive()
+
 	Local $RMessage = IniReadSection($g_TRAIni, 'IN-Check')
 	Local $TMessage = IniReadSection($g_TRAIni, 'IN-Test')
 	Local $Message = IniReadSection($g_TRAIni, 'IN-Au3Install')
@@ -587,6 +598,10 @@ Func Au3Install($p_Num = 0, $p_Debug = 0)
 		EndIf
 		FileClose(FileOpen($g_BG2Dir & '\BiG World Project.installed', 1))
 	EndIf
+
+    ; Restore screensaver and power save settings.
+    _PowerResetState()
+
 	GUICtrlSetData($g_UI_Static[6][2], _GetTR($Message, 'L13')) ; => complete
 	_Process_Gui_Delete(7, 7, 1)
 EndFunc   ;==>Au3Install
